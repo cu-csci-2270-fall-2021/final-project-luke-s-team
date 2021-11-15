@@ -17,7 +17,7 @@ MiniGit::MiniGit() {
 MiniGit::~MiniGit() {   
     // Any postprocessing that may be required
     fs::remove_all(".minigit");
-    
+   
     // temporary check
      if(commitHead->fileHead != NULL)
         cout << "checking" << endl;
@@ -36,15 +36,22 @@ void MiniGit::init(int hashtablesize)
     commitHead->commitID = 0;
     commitHead->commitMessage = "";
     commitHead->fileHead = NULL;
+    commitHead->next = NULL;
+    commitHead->previous = NULL;
 }
 
 void MiniGit::add(string fileName) 
 {
     // add new node
-    // very simpel NOT FINAL
+    // very simple NOT FINAL
     FileNode * newFile = new FileNode;
     newFile -> name = fileName;
+    newFile -> version = 0;
     newFile -> next = commitHead->fileHead;
+    
+    commitHead -> fileHead = newFile;
+    
+    cout << commitHead->fileHead->name << endl;
 
     // old code. May be useful but not working right now
     
