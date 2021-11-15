@@ -17,6 +17,8 @@ MiniGit::MiniGit() {
 MiniGit::~MiniGit() {   
     // Any postprocessing that may be required
     fs::remove_all(".minigit");
+    
+    // temporary check
      if(commitHead->fileHead != NULL)
         cout << "checking" << endl;
 }
@@ -26,15 +28,26 @@ void MiniGit::init(int hashtablesize)
     fs::remove_all(".minigit");
     fs::create_directory(".minigit");
     
+    // create new hash table
+    ht = new HashTable(hashtablesize);
+    
+    // create new commit head to use
+    commitHead = new BranchNode;
+    commitHead->commitID = 0;
+    commitHead->commitMessage = "";
+    commitHead->fileHead = NULL;
 }
 
 void MiniGit::add(string fileName) 
 {
     // add new node
+    // very simpel NOT FINAL
     FileNode * newFile = new FileNode;
     newFile -> name = fileName;
     newFile -> next = commitHead->fileHead;
 
+    // old code. May be useful but not working right now
+    
     // check to make sure it does not already exist
     /*
     FileNode * curr = commitHead->fileHead;
@@ -88,7 +101,7 @@ void MiniGit::rm(string fileName) {
 
 void MiniGit::printSearchTable()
 {
-     //ht->printTable();
+     ht->printTable();
 }
 
 
