@@ -25,11 +25,11 @@ unsigned int HashTable::hashFunction(string s)
     // use division method to create a hash
     int sum = 0;
     for(int i = 0; i < s.size(); i+=1)
-        sum += key[i];
+        sum += s[i];
     sum %= tableSize;
     
     // use linear probing to fix collisions
-    while(table[sum] != NUll)
+    while(table[sum] != NULL)
     {
         sum += 1;
         if(sum < tableSize)
@@ -53,11 +53,11 @@ HashNode* HashTable::searchItem(string key)
 //function to insert
 bool HashTable::insertItem(string key, int cNum)
 {
-    HashNode newNode = new HashNode;
+    HashNode * newNode = new HashNode;
     newNode -> key = key;
     newNode -> commitNums.push_back(cNum);
     
-    usigned int hash = hashFunction(key);
+    int hash = hashFunction(key);
     table[hash] = newNode;
     
     return false;
@@ -79,5 +79,11 @@ bool HashTable::insertItem(string key, int cNum)
 */
 void HashTable::printTable()
 {
-
+    for(int i = 0; i < tableSize; i+=1)
+    {
+        cout << table[i]->key << "(";
+        for(int j = 0; j < table[i]->commitNums.size();j+=1)
+            cout << table[i]->commitNums[j] << ", ";
+        cout << endl;
+    }
 }
