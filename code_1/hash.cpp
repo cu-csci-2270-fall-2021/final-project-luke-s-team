@@ -13,33 +13,53 @@ HashNode* HashTable::createNode(string key, HashNode* next)
 
 HashTable::HashTable(int bsize)
 {
-   
+    tableSize = bsize;
+    table[tableSize];
+    for(int i = 0; i < tableSize; i+=1)
+        table[i] = NULL;
 }
 
 //function to calculate hash function
 unsigned int HashTable::hashFunction(string s)
 {
+    // use division method to create a hash
+    int sum = 0;
+    for(int i = 0; i < s.size(); i+=1)
+        sum += key[i];
+    sum %= tableSize;
     
-    return 0;
+    // use linear probing to fix collisions
+    while(table[sum] != NUll)
+    {
+        sum += 1;
+        if(sum < tableSize)
+            sum = 0;
+    }
+    
+    return sum;
 }
 
 // TODO Complete this function
 //function to search
 HashNode* HashTable::searchItem(string key)
 {
-   
-
-    //TODO
-    return NULL;
-    
+    for(int i = 0; i < tableSize; i+=1)
+        if(table[i]->key == key)
+            return table[i];
+    return NULL; 
 }
 
 //TODO Complete this function
 //function to insert
 bool HashTable::insertItem(string key, int cNum)
 {
+    HashNode newNode = new HashNode;
+    newNode -> key = key;
+    newNode -> commitNums.push_back(cNum);
     
-    //TODO
+    usigned int hash = hashFunction(key);
+    table[hash] = newNode;
+    
     return false;
 }
 
@@ -60,4 +80,4 @@ bool HashTable::insertItem(string key, int cNum)
 void HashTable::printTable()
 {
 
- }
+}
