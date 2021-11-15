@@ -81,9 +81,12 @@ void HashTable::printTable()
 {
     for(int i = 0; i < tableSize; i+=1)
     {
-        cout << table[i]->key << "(";
-        for(int j = 0; j < table[i]->commitNums.size();j+=1)
-            cout << table[i]->commitNums[j] << ", ";
+        if(table[i] != NULL)
+        {
+            cout << table[i]->key << "(";
+            for(int j = 0; j < table[i]->commitNums.size();j+=1)
+                cout << table[i]->commitNums[j] << ", ";
+        }
         cout << endl;
     }
 }
