@@ -95,7 +95,50 @@ void MiniGit::add(string fileName)
 
 void MiniGit::rm(string fileName) 
 {
-    
+    // check list is not empty
+    if(commitHead->fileHead == NULL)
+    {
+        cout << "There are no files to delete." << endl;
+    }
+    // files exist
+    else
+    {
+        // check that the file is in the list
+        FileNode * crawler = commitHead->fileHead;
+        bool check = false;
+        while(crawler != NULL)
+        {
+            if(crawler->name == fileName)
+                check = true;
+            crawler = crawler->next;
+        }
+         
+        //  file not in list
+        if(!check)
+            cout << "File is not in the list" << endl;
+        // file in list
+        // only head node
+        else if(commitHead->fileHead->next == NULL)
+        {
+            delete commitHead->fileHead;
+            commitHead->fileHead = NULL;
+        }
+        // delete file from list
+        else
+        {
+            FileNode * pres = commitHead->fileHead;
+            FileNode * prev = NULL;
+            while(pres != NULL)
+            {
+                if(pres->name == fileName)
+                    break;
+                prev = pres;
+                crawler = pres->next;
+            }
+            prev->next = pres->next;
+            delete pres;
+        }
+    }
 }
 
 
