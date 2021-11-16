@@ -16,11 +16,11 @@ MiniGit::MiniGit() {
 
 MiniGit::~MiniGit() {   
     // Any postprocessing that may be required
-    fs::remove_all(".minigit");
+   // fs::remove_all(".minigit");
    
     // temporary check
-     if(commitHead->fileHead != NULL)
-        cout << "checking" << endl;
+     //if(commitHead->fileHead != NULL)
+     //   cout << "checking" << endl;
 }
 
 void MiniGit::init(int hashtablesize) 
@@ -42,62 +42,47 @@ void MiniGit::init(int hashtablesize)
 
 void MiniGit::add(string fileName) 
 {
-    // add new node
-    // very simple NOT FINAL
+    // create new node
     FileNode * newFile = new FileNode;
     newFile -> name = fileName;
     newFile -> version = 0;
-    newFile -> next = commitHead->fileHead;
+    newFile -> next = NULL;
     
-    commitHead -> fileHead = newFile;
-    
-    cout << commitHead->fileHead->name << endl;
-
-    // old code. May be useful but not working right now
-    
-    // check to make sure it does not already exist
-    /*
-    FileNode * curr = commitHead->fileHead;
-    
-    // if list is null add to start
-    if(curr == NULL)
+    // add node to head if head is null
+    if(commitHead->fileHead == NULL)
     {
-        fileName += "00";
-        FileNode * newFile = new FileNode;
-        newFile -> name = fileName;
-        newFile -> next = commitHead->fileHead;
+        commitHead -> fileHead = newFile;
+        cout << commitHead->fileHead->name << endl;
     }
+    // add node to end of list
     else
     {
+        // check that the file is not already part of the list
+        FileNode * crawler = commitHead->fileHead;
         bool check = false;
-        while(curr != NULL)
+        while(crawler != NULL)
         {
-            if(fileName == curr->name)
-            {
+            if(crawler->name == fileName)
                 check = true;
-                break;
-            }
-            curr = curr->next;
+            crawler = crawler->next;
         }
-        /*
-        while(check)
+        // if file was already in list prompt the user to try again
+        if(check)
         {
+            fileName = "";
             cout << "Enter a file name: ";
             cin >> fileName;
-            check = false;
-            curr = commitHead->fileHead;
-            while(curr != NULL)
-            {
-                if(fileName == curr->name)
-                {
-                    check = true;
-                    break;
-                }
-                curr = curr->next;
-            }
+            add(fileName);
         }
-        */
-    //}*/
+        // add the new file to the end of the list
+        else
+        {
+            crawler = commitHead->fileHead;
+            while(crawler->next!=NULL)
+                crawler = crawler->next;
+            crawler->next = newFile;
+        }
+    }
 }
 
 void MiniGit::rm(string fileName) {
