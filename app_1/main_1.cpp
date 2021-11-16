@@ -36,6 +36,7 @@ int main(int argc, char* argv[])
 {
     bool menuOn = true;
     int menuChoice = 0;
+    string m_input;
     
     MiniGit myGit;
     string fileName = "";
@@ -45,12 +46,17 @@ int main(int argc, char* argv[])
     {
         displayMenu();
         
-        cin >> menuChoice;
-        while(menuChoice <= 0 || menuChoice > 7)
+        // used from provided code in assignment 4
+        getline(cin,m_input);
+        try
         {
-            cout << "Enter a valid optiond: ";
-            cin >> menuChoice;
+             menuChoice = stoi(m_input);
         }
+        catch (exception& e)
+        {
+            menuChoice = 10;
+        }
+        
         
         switch(menuChoice)
         {
@@ -98,6 +104,9 @@ int main(int argc, char* argv[])
             // quit
             case 5:
                 menuOn = false;
+            break;
+            default:
+                cout << "Invalid input" << endl;
             break;
         }
     }
