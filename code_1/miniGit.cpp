@@ -16,11 +16,19 @@ MiniGit::MiniGit() {
 
 MiniGit::~MiniGit() {   
     // Any postprocessing that may be required
-   // fs::remove_all(".minigit");
-   
-    // temporary check
-     //if(commitHead->fileHead != NULL)
-     //   cout << "checking" << endl;
+    
+    // delete the singly linked list
+    FileNode * crawler = commitHead->fileHead;
+    while(commitHead->fileHead != NULL)
+    {
+        crawler = commitHead->fileHead -> next;
+        delete commitHead->fileHead;
+        commitHead->fileHead = crawler;
+    }
+    commitHead->fileHead = NULL;
+    
+    //fs::remove_all(".minigit");
+
 }
 
 void MiniGit::init(int hashtablesize) 
@@ -85,7 +93,8 @@ void MiniGit::add(string fileName)
     }
 }
 
-void MiniGit::rm(string fileName) {
+void MiniGit::rm(string fileName) 
+{
     
 }
 
