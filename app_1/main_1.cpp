@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <string>
 using namespace std;
-
 // temporary comment, remove befor turning in
 // use this command to run the code
 // g++ --std=c++17 main_1.cpp ../code_1/miniGit.cpp ../code_1/hash.cpp -o a.out
@@ -89,20 +88,25 @@ int main(int argc, char* argv[])
                 cout << "Enter a commit message: ";
                 getline(cin, message);
                 cout << message << endl;
-                //bool check = checkCommitMessage(message);
+                while(!checkCommitMessage(message))
+                {
+                    cout << "Enter a valid commit message: ";
+                    getline(cin, message);
+                }
             break;
                 
-            /*
             // Search commits based on key word
             case 5:
+                cout << "not coded yet" << endl;
             break;
                 
             // check out specific version based on a unique commit option
             case 6:
+                cout << "not coded yet" << endl;
             break;
-                */
+                
             // quit
-            case 5:
+            case 7:
                 menuOn = false;
             break;
             default:
