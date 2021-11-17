@@ -28,15 +28,15 @@ MiniGit::~MiniGit() {
     commitHead->fileHead = NULL;
     
     fs::remove_all(".minigit");
-   fs::remove_all(".new");
+    fs::remove_all(".new");
 }
 
 void MiniGit::init(int hashtablesize) 
 {
-    //fs::remove_all(".minigit");
+   // fs::remove_all(".minigit");
+   // fs::create_directory(".minigit");
     fs::remove_all(".new");
     fs::create_directory(".new");
-   // fs::create_directory(".minigit");
 
     // create new hash table
     ht = new HashTable(hashtablesize);
@@ -136,7 +136,7 @@ void MiniGit::rm(string fileName)
                 if(pres->name == fileName)
                     break;
                 prev = pres;
-                crawler = pres->next;
+                pres = pres->next;
             }
             // check to make sure prev is not null
             if(prev != NULL) 
@@ -166,12 +166,12 @@ string MiniGit::commit(string msg)
     while(crawler != NULL)
     {
         cout << crawler->name << endl;
-        string fName = "new/"+crawler->name;
-        string fName2 = "minigit/"+crawler->name;
+        string fName = ".new/"+crawler->name;
+        string fName2 = ".minigit/"+crawler->name;
         if(!fs::exists(fName))
         {
             cout << "Copying" << endl;
-            fs::copy_file(fName,fName2);
+            //fs::copy_file(fName,fName2);
         }
         crawler = crawler->next;
     }
