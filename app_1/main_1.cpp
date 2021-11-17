@@ -37,6 +37,11 @@ bool checkCommitMessage(string message)
     return true;
 }
 
+void f1()
+{
+    cout << "This is my test function" << endl;
+}
+
 int main(int argc, char* argv[]) 
 {
     bool menuOn = true;
