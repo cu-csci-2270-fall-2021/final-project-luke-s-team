@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <string>
 using namespace std;
-
 // temporary comment, remove befor turning in
 // use this command to run the code
 // g++ --std=c++17 main_1.cpp ../code_1/miniGit.cpp ../code_1/hash.cpp -o a.out
@@ -30,10 +29,11 @@ void displayMenu()
 bool checkCommitMessage(string message)
 {
     int words = 0;
-    for(int length = 0; message.size() > length; length++){
-        if(message[length] == ' ') words++;
-    }
-    if(words > 2) return false;
+    for(int length = 0; message.size() > length; length++)
+        if(message[length] == ' ')
+            words++;
+    if(words > 2)
+        return false;
     return true;
 }
 
@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
 {
     bool menuOn = true;
     int menuChoice = 0;
+    string m_input;
     
     MiniGit myGit;
     string fileName = "";
@@ -50,12 +51,17 @@ int main(int argc, char* argv[])
     {
         displayMenu();
         
-        cin >> menuChoice;
-        while(menuChoice <= 0 || menuChoice > 7)
+        // used from provided code in assignment 4
+        getline(cin,m_input);
+        try
         {
-            cout << "Enter a valid option: ";
-            cin >> menuChoice;
+             menuChoice = stoi(m_input);
         }
+        catch (exception& e)
+        {
+            menuChoice = 10;
+        }
+        
         
         switch(menuChoice)
         {
@@ -69,7 +75,7 @@ int main(int argc, char* argv[])
             case 2:
                 fileName = "";
                 cout << "Enter a file name: ";
-                cin >> fileName;
+                getline(cin,fileName);
                 
                 myGit.add(fileName);
             break;
@@ -78,7 +84,7 @@ int main(int argc, char* argv[])
             case 3:
                 fileName = "";
                 cout << "Enter a file name: ";
-                cin >> fileName;
+                getline(cin,fileName);
                 
                 myGit.rm(fileName);
             break;
@@ -88,28 +94,37 @@ int main(int argc, char* argv[])
                 cout << "Enter a commit message: ";
                 getline(cin, message);
                 cout << message << endl;
-                while(!checkCommitMessage(message)){
-                    cout << "Enter a commit message: ";
+                /*
+                while(!checkCommitMessage(message))
+                {
+                    cout << "Enter a valid commit message: ";
                     getline(cin, message);
                     cout << message << endl;
                 }
+                */
+                //myGit.commit(message);
             break;
                 
-            /*
             // Search commits based on key word
             case 5:
+                cout << "not coded yet" << endl;
             break;
                 
             // check out specific version based on a unique commit option
             case 6:
+                cout << "not coded yet" << endl;
             break;
-                */
+                
             // quit
             case 7:
                 menuOn = false;
+            break;
+            default:
+                cout << "Invalid input" << endl;
             break;
         }
     }
    
     return 0;
 }
+
