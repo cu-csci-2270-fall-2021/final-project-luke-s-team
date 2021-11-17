@@ -133,9 +133,10 @@ void MiniGit::rm(string fileName)
                 if(pres->name == fileName)
                     break;
                 prev = pres;
-                crawler = pres->next;
+                pres = pres->next;
             }
-            prev->next = pres->next;
+            //check prev is not NULL
+            if(prev != NULL) prev->next = pres->next;
             delete pres;
         }
     }

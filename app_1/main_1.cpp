@@ -29,6 +29,11 @@ void displayMenu()
 // check to make sure the commit message is a valid length of three words
 bool checkCommitMessage(string message)
 {
+    int words = 0;
+    for(int length = 0; message.size() > length; length++){
+        if(message[length] == ' ') words++;
+    }
+    if(words > 2) return false;
     return true;
 }
 
@@ -48,7 +53,7 @@ int main(int argc, char* argv[])
         cin >> menuChoice;
         while(menuChoice <= 0 || menuChoice > 7)
         {
-            cout << "Enter a valid optiond: ";
+            cout << "Enter a valid option: ";
             cin >> menuChoice;
         }
         
@@ -83,7 +88,11 @@ int main(int argc, char* argv[])
                 cout << "Enter a commit message: ";
                 getline(cin, message);
                 cout << message << endl;
-                //bool check = checkCommitMessage(message);
+                while(!checkCommitMessage(message)){
+                    cout << "Enter a commit message: ";
+                    getline(cin, message);
+                    cout << message << endl;
+                }
             break;
                 
             /*
@@ -96,7 +105,7 @@ int main(int argc, char* argv[])
             break;
                 */
             // quit
-            case 5:
+            case 7:
                 menuOn = false;
             break;
         }
