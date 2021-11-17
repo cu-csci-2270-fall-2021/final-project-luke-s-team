@@ -27,18 +27,19 @@ MiniGit::~MiniGit() {
     }
     commitHead->fileHead = NULL;
     
-    //fs::remove_all(".minigit");
-
+    fs::remove_all(".minigit");
+   // fs::remove_all(".new");
 }
 
 void MiniGit::init(int hashtablesize) 
 {
     fs::remove_all(".minigit");
+    //fs::create_directory(".new");
     fs::create_directory(".minigit");
-    
+
     // create new hash table
     ht = new HashTable(hashtablesize);
-    
+
     // create new commit head to use
     commitHead = new BranchNode;
     commitHead->commitID = 0;
@@ -121,13 +122,14 @@ void MiniGit::rm(string fileName)
         else if(commitHead->fileHead->next == NULL)
         {
             delete commitHead->fileHead;
-            commitHead->fileHead = NULL;
+            commitHead->fileHead = commitHead->fileHead->next;
         }
         // delete file from list
         else
         {
             FileNode * pres = commitHead->fileHead;
             FileNode * prev = NULL;
+            
             while(pres != NULL)
             {
                 if(pres->name == fileName)
@@ -135,7 +137,9 @@ void MiniGit::rm(string fileName)
                 prev = pres;
                 crawler = pres->next;
             }
-            prev->next = pres->next;
+            // check to make sure prev is not null
+            if(prev != NULL) 
+                prev->next = pres->next;
             delete pres;
         }
     }
@@ -155,7 +159,22 @@ void MiniGit::search(string key)
 
 
 
-string MiniGit::commit(string msg) {
+string MiniGit::commit(string msg) 
+{
+    FileNode * crawler = commitHead->fileHead;
+    while(crawler != NULL)
+    {
+        cout << crawler->name << endl;
+        string fName = "new/"+crawler->name;
+        string fName2 = "minigit/"+crawler->name;
+        if(!fs::exists(fName))
+        {
+            cout << "Copying" << endl;
+            //fs::copy_file(fName,fName2);
+        }
+        crawler = crawler->next;
+    }
+    
     return " "; //should return the commitID of the commited DLL node
 }
 
