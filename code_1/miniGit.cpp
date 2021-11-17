@@ -27,8 +27,18 @@ MiniGit::~MiniGit() {
     }
     commitHead->fileHead = NULL;
     
-    fs::remove_all(".minigit");
-    fs::remove_all(".new");
+    // delete the doubly linked list
+    BranchNode * crawler2 = commitHead;
+    while(commitHead != NULL)
+    {
+        crawler2 = commitHead -> next;
+        delete commitHead;
+        commitHead = crawler2;
+    }
+    commitHead = NULL;
+    
+    //fs::remove_all(".minigit");
+    //fs::remove_all(".new");
 }
 
 void MiniGit::init(int hashtablesize) 
