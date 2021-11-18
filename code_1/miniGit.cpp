@@ -201,5 +201,3 @@ void MiniGit::checkout(string commitID) {
    
 
 }
-
-

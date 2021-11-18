@@ -1,30 +1,25 @@
 #include <iostream>
-#include "../code_1/miniGit.hpp"
-#include <filesystem>
-#include <string>
+#include <fstream>
+#include <sstream>
 using namespace std;
-// temporary comment, remove befor turning in
-// use this command to run the code
-// g++ --std=c++17 main_1.cpp ../code_1/miniGit.cpp ../code_1/hash.cpp -o a.out
 
-/*
- * Purpose; displays a menu with options
- */
-void displayMenu()
-{
-    cout << "Select a numerical option:" << endl;
-    cout << "+=====Main Menu=========+" << endl;
-    cout << " 1. init " << endl;
-    cout << " 2. add " << endl;
-    cout << " 3. rm " << endl;
-    cout << " 4. commit " << endl;
-    cout << " 5. checkout" << endl;
-    cout << " 6. search" << endl;
-    cout << " 7. quit " << endl;
-    cout << "+-----------------------+" << endl;
-    cout << "#> ";
+#include <filesystem>
+namespace fs = std::filesystem;
+
+#include "miniGit.hpp"
+#include <vector>
+
+bool node(string message){
+    BranchNode *branchNode = commitHead;
+    if(message == branchNode->commitMessage) return true;
+    for(int node = 0; commits > node; node++) {
+        branchNode = branchNode->next;
+        if(message == branchNode->commitMessage) return true;
+    }
+    return false;
 }
 
+<<<<<<< HEAD
 // check to make sure the commit message is a valid length of three words
 bool checkCommitMessage(string message)
 {
@@ -35,96 +30,197 @@ bool checkCommitMessage(string message)
     if(words > 2 || node)
         return false;
     return true;
+=======
+MiniGit::MiniGit() {
+    fs::remove_all(".minigit");
+    fs::create_directory(".minigit");
+>>>>>>> 3b172db1aeac25fd6ddc57ea4bc56bc1ff28f144
 }
 
-int main(int argc, char* argv[]) 
-{
-    bool menuOn = true;
-    int menuChoice = 0;
-    string m_input;
+MiniGit::~MiniGit() {   
+    // Any postprocessing that may be required
     
-    MiniGit myGit;
-    string fileName = "";
-    string message = "";
-    
-    while(menuOn)
+    // delete the singly linked list
+    FileNode * crawler = commitHead->fileHead;
+    while(commitHead->fileHead != NULL)
     {
-        displayMenu();
-        
-        // used from provided code in assignment 4
-        getline(cin,m_input);
-        try
+        crawler = commitHead->fileHead -> next;
+        delete commitHead->fileHead;
+        commitHead->fileHead = crawler;
+    }
+    commitHead->fileHead = NULL;
+    
+    // delete the doubly linked list
+    BranchNode * crawler2 = commitHead;
+    while(commitHead != NULL)
+    {
+        crawler2 = commitHead -> next;
+        delete commitHead;
+        commitHead = crawler2;
+    }
+    commitHead = NULL;
+    
+    //fs::remove_all(".minigit");
+    //fs::remove_all(".new");
+}
+
+void MiniGit::init(int hashtablesize) 
+{
+    // create new hash table
+    // causes seg fault
+    //ht = new HashTable(hashtablesize);
+    
+    commits = 0;
+
+    // create new commit head to use
+    commitHead = new BranchNode;
+    commitHead->commitID = 0;
+    commitHead->commitMessage = "";
+    commitHead->fileHead = NULL;
+    commitHead->next = NULL;
+    commitHead->previous = NULL;
+}
+
+void MiniGit::add(string fileName) 
+{
+    // create new node
+    FileNode * newFile = new FileNode;
+    newFile -> name = fileName;
+    newFile -> version = 0;
+    newFile -> next = NULL;
+    
+    // add node to head if head is null
+    if(commitHead->fileHead == NULL)
+    {
+        commitHead -> fileHead = newFile;
+        cout << commitHead->fileHead->name << endl;
+    }
+    // add node to end of list
+    else
+    {
+        // check that the file is not already part of the list
+        FileNode * crawler = commitHead->fileHead;
+        bool check = false;
+        while(crawler != NULL)
         {
-             menuChoice = stoi(m_input);
+            if(crawler->name == fileName)
+                check = true;
+            crawler = crawler->next;
         }
-        catch (exception& e)
+        // if file was already in list prompt the user to try again
+        if(check)
         {
-            menuChoice = 10;
+            fileName = "";
+            cout << "Enter a file name: ";
+            cin >> fileName;
+            add(fileName);
         }
-        
-        
-        switch(menuChoice)
+        // add the new file to the end of the list
+        else
         {
-            // initialise a new repository
-            case 1:
-                myGit.init(5);
-                myGit.printSearchTable();
-            break;
-                
-            // add files to current commit
-            case 2:
-                fileName = "";
-                cout << "Enter a file name: ";
-                getline(cin,fileName);
-                
-                myGit.add(fileName);
-            break;
-        
-            // remove files from current commit
-            case 3:
-                fileName = "";
-                cout << "Enter a file name: ";
-                getline(cin,fileName);
-                
-                myGit.rm(fileName);
-            break;
-                
-            // Commit Changes
-            case 4:
-                cout << "Enter a commit message: ";
-                getline(cin, message);
-                cout << message << endl;
-                /*
-                while(!checkCommitMessage(message))
-                {
-                    cout << "Enter a valid commit message: ";
-                    getline(cin, message);
-                    cout << message << endl;
-                }
-                */
-                //myGit.commit(message);
-            break;
-                
-            // Search commits based on key word
-            case 5:
-                cout << "not coded yet" << endl;
-            break;
-                
-            // check out specific version based on a unique commit option
-            case 6:
-                cout << "not coded yet" << endl;
-            break;
-                
-            // quit
-            case 7:
-                menuOn = false;
-            break;
-            default:
-                cout << "Invalid input" << endl;
-            break;
+            crawler = commitHead->fileHead;
+            while(crawler->next!=NULL)
+                crawler = crawler->next;
+            crawler->next = newFile;
         }
     }
-   
-    return 0;
 }
 
+void MiniGit::rm(string fileName) 
+{
+    // check list is not empty
+    if(commitHead->fileHead == NULL)
+    {
+        cout << "There are no files to delete." << endl;
+    }
+    // files exist
+    else
+    {
+        // check that the file is in the list
+        FileNode * crawler = commitHead->fileHead;
+        bool check = false;
+        while(crawler != NULL)
+        {
+            if(crawler->name == fileName)
+                check = true;
+            crawler = crawler->next;
+        }
+         
+        //  file not in list
+        if(!check)
+            cout << "File is not in the list" << endl;
+        // file in list
+        // only head node
+        else if(commitHead->fileHead->next == NULL)
+        {
+            delete commitHead->fileHead;
+            commitHead->fileHead = commitHead->fileHead->next;
+        }
+        // delete file from list
+        else
+        {
+            FileNode * pres = commitHead->fileHead;
+            FileNode * prev = NULL;
+            
+            while(pres != NULL)
+            {
+                if(pres->name == fileName)
+                    break;
+                prev = pres;
+                pres = pres->next;
+            }
+            // check to make sure prev is not null
+            if(prev != NULL) 
+                prev->next = pres->next;
+            delete pres;
+        }
+    }
+}
+
+
+
+void MiniGit::printSearchTable()
+{
+     ht->printTable();
+}
+
+
+void MiniGit::search(string key)
+{
+}
+
+
+
+string MiniGit::commit(string msg) 
+{
+    // create new node
+    BranchNode * newNode = new BranchNode;
+    newNode->commitMessage = msg;
+    newNode->commitID = commits;
+    newNode -> next = NULL;
+    
+    commits += 1;
+    
+    newNode->fileHead = commitHead->fileHead;
+    
+    // empty starting repository
+    if(commits == 0)
+        newNode->previous = NULL;
+    else
+        newNode->previous = commitHead;
+    
+    commitHead = newNode;
+    
+    // update commits
+    
+    
+    //should return the commitID of the commited DLL node
+    string r = to_string(commits-1);
+    return r;
+    
+}
+
+void MiniGit::checkout(string commitID) {
+   
+
+}
