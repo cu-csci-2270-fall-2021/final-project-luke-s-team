@@ -2,25 +2,29 @@
 #include <fstream>
 #include <sstream>
 using namespace std;
-bool node(string message){
-    BranchNode *branchNode = commitHead;
-    if(message == branchNode->commitMessage) return true;
-    for(int node = 0; commits > node; node++) {
-        branchNode = branchNode->next;
-        if(message == branchNode->commitMessage) return true;
-    }
-    return false;
-}
+
 #include <filesystem>
 namespace fs = std::filesystem;
 
 #include "miniGit.hpp"
 #include <vector>
 
+
 MiniGit::MiniGit() {
     fs::remove_all(".minigit");
     fs::create_directory(".minigit");
 }
+
+bool MiniGit::node(string message){
+    BranchNode *branchNode = commitHead;
+    if(message == branchNode->commitMessage) return true;
+    while(branchNode != NULL){
+        branchNode = branchNode->next;
+        if(message == branchNode->commitMessage) return true;
+    }
+    return false;
+}
+
 
 MiniGit::~MiniGit() {   
     // Any postprocessing that may be required
@@ -51,13 +55,11 @@ MiniGit::~MiniGit() {
 
 void MiniGit::init(int hashtablesize) 
 {
-   // fs::remove_all(".minigit");
-   // fs::create_directory(".minigit");
-    fs::remove_all(".new");
-    fs::create_directory(".new");
-    commits = 0;
     // create new hash table
-    ht = new HashTable(hashtablesize);
+    // causes seg fault
+    //ht = new HashTable(hashtablesize);
+    
+    commits = 0;
 
     // create new commit head to use
     commitHead = new BranchNode;
@@ -180,24 +182,36 @@ void MiniGit::search(string key)
 
 string MiniGit::commit(string msg) 
 {
-    FileNode * crawler = commitHead->fileHead;
-    while(crawler != NULL)
-    {
-        cout << crawler->name << endl;
-        string fName = ".new/"+crawler->name;
-        string fName2 = ".minigit/"+crawler->name;
-        if(!fs::exists(fName))
-        {
-            cout << "Copying" << endl;
-            //fs::copy_file(fName,fName2);
-        }
-        crawler = crawler->next;
-    }
+    // create new node
+    BranchNode * newNode = new BranchNode;
+    newNode->commitMessage = msg;
+    newNode->commitID = commits;
+    newNode -> next = NULL;
     
-    return " "; //should return the commitID of the commited DLL node
+    commits += 1;
+    
+    newNode->fileHead = commitHead->fileHead;
+    
+    // empty starting repository
+    if(commits == 0)
+        newNode->previous = NULL;
+    else
+        newNode->previous = commitHead;
+    
+    commitHead = newNode;
+    
+    // update commits
+    
+    
+    //should return the commitID of the commited DLL node
+    string r = to_string(commits-1);
+    return r;
+    
 }
 
 void MiniGit::checkout(string commitID) {
    
 
 }
+
+
