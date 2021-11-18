@@ -2,7 +2,15 @@
 #include <fstream>
 #include <sstream>
 using namespace std;
-
+bool node(string message){
+    BranchNode *branchNode = commitHead;
+    if(message == branchNode->commitMessage) return true;
+    for(int node = 0; commits > node; node++) {
+        branchNode = branchNode->next;
+        if(message == branchNode->commitMessage) return true;
+    }
+    return false;
+}
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -47,7 +55,7 @@ void MiniGit::init(int hashtablesize)
    // fs::create_directory(".minigit");
     fs::remove_all(".new");
     fs::create_directory(".new");
-
+    commits = 0;
     // create new hash table
     ht = new HashTable(hashtablesize);
 
@@ -193,5 +201,3 @@ void MiniGit::checkout(string commitID) {
    
 
 }
-
-
