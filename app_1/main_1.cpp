@@ -32,7 +32,7 @@ bool checkCommitMessage(string message)
     for(int length = 0; message.size() > length; length++)
         if(message[length] == ' ')
             words++;
-    if(words > 2)
+    if(words > 2 || node)
         return false;
     return true;
 }
