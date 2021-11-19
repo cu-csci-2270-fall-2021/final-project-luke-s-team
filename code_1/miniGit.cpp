@@ -11,25 +11,23 @@ namespace fs = std::filesystem;
 
 
 MiniGit::MiniGit() {
-    fs::remove_all(".minigit");
-    fs::create_directory(".minigit");
+    //fs::remove_all(".minigit");
+    //fs::create_directory(".minigit");
 }
 
 bool MiniGit::node(string message){
     BranchNode *branchNode = commitHead;
     if(message == branchNode->commitMessage) return true;
     while(branchNode != NULL){
-        branchNode = branchNode->next;
         if(message == branchNode->commitMessage) return true;
+        branchNode = branchNode->next;
     }
     return false;
 }
 
-
 MiniGit::~MiniGit() {   
     // Any postprocessing that may be required
     
-    // delete the singly linked list
     FileNode * crawler = commitHead->fileHead;
     while(commitHead->fileHead != NULL)
     {
@@ -49,15 +47,20 @@ MiniGit::~MiniGit() {
     }
     commitHead = NULL;
     
-    //fs::remove_all(".minigit");
-    //fs::remove_all(".new");
+    fs::remove_all(".minigit");
 }
 
 void MiniGit::init(int hashtablesize) 
-{
+{ 
+    
+    // initialize new repository
+    fs::remove_all(".minigit");
+    fs::create_directory(".minigit");
+    
     // create new hash table
     // causes seg fault
     //ht = new HashTable(hashtablesize);
+
     
     commits = 0;
 
@@ -82,27 +85,27 @@ void MiniGit::add(string fileName)
     if(commitHead->fileHead == NULL)
     {
         commitHead -> fileHead = newFile;
-        cout << commitHead->fileHead->name << endl;
     }
     // add node to end of list
     else
     {
-        // check that the file is not already part of the list
-        FileNode * crawler = commitHead->fileHead;
         bool check = false;
+        // check that the file does not already exist
+        FileNode * crawler = commitHead->fileHead;
         while(crawler != NULL)
         {
             if(crawler->name == fileName)
                 check = true;
             crawler = crawler->next;
         }
+        // check that the file exist in the directory
+        if(!fs::exists(fileName))
+            check = true;
+        
         // if file was already in list prompt the user to try again
         if(check)
         {
-            fileName = "";
-            cout << "Enter a file name: ";
-            cin >> fileName;
-            add(fileName);
+            cout << "Must enter valid file name" << endl;
         }
         // add the new file to the end of the list
         else
@@ -134,7 +137,7 @@ void MiniGit::rm(string fileName)
                 check = true;
             crawler = crawler->next;
         }
-         
+        
         //  file not in list
         if(!check)
             cout << "File is not in the list" << endl;
@@ -188,19 +191,62 @@ string MiniGit::commit(string msg)
     newNode->commitID = commits;
     newNode -> next = NULL;
     
-    commits += 1;
+    
     
     newNode->fileHead = commitHead->fileHead;
     
     // empty starting repository
     if(commits == 0)
+    {
+        // starting with no prev null
         newNode->previous = NULL;
+        
+        // add files to minigit
+        FileNode * curr = commitHead->fileHead;
+        while(curr != NULL)
+        {
+            fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+            curr = curr->next;
+        }
+    }
+    // will be copying/adding files
     else
+    {
+        // has a prev node
         newNode->previous = commitHead;
+        
+        bool check = false;
+        
+        // check if changes
+        // if no changes do not commit
+        
+        // this code converst the files to string to use in comparison
+        
+        ifstream t1(commitHead->fileHead->name);
+        ostringstream s1;
+        s1<< t1.rdbuf();
+        cout << s1.str() << endl;
+        
+        // right now t2 does not retrieve the correct file
+        fstream t2(".minigit/"+commitHead->fileHead->name);
+        ostringstream s2;
+        s2<< t2.rdbuf();
+        cout << s2.str() << endl;
+        
+        
+        // else there has been changes
+        // update version number
+        // add new version to minigit
+    }
     
+    
+    // Do the final update
+    newNode->previous = commitHead;
+    
+    commits += 1;
     commitHead = newNode;
     
-    // update commits
+    // update commits in hash table
     
     
     //should return the commitID of the commited DLL node
