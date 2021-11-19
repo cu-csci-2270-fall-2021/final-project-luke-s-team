@@ -1,0 +1,3 @@
+Created this folder similar to what our TA did during recitation. When adding files add these file names.
+ALSO
+when running the program run it from this folder. There is a new command function in main_1. Use the second one
