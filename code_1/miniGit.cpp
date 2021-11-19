@@ -195,7 +195,7 @@ string MiniGit::commit(string msg)
     
     newNode->fileHead = commitHead->fileHead;
     
-    // empty starting repository
+    // empty starting repository add everything from the SLL
     if(commits == 0)
     {
         // starting with no prev null
@@ -212,33 +212,53 @@ string MiniGit::commit(string msg)
     // will be copying/adding files
     else
     {
-        // has a prev node
+        // has a prev node, set here
         newNode->previous = commitHead;
-        
-        bool check = false;
         
         // check if changes
         // if no changes do not commit
+        bool check = false;
         
-        // this code converst the files to string to use in comparison
+        // check for any new files and no changes in those files
+        // do not commit if that is the case
+        // this loop also updates the directory with the new file if it was changed
+        // also checks if the file of a different name is not in the directory and adds it
+        FileNode * curr = commitHead->fileHead;
+        while(curr != NULL)
+        {
+            if(fs::exists(".minigit/"+curr->name+to_string(curr->version)))
+            {
+                fstream t1(curr->name);
+                ostringstream s1;
+                s1<< t1.rdbuf();
+                
+                fstream t2(".minigit/"+curr->name+to_string(curr->version));
+                ostringstream s2;
+                s2<< t2.rdbuf();
+                
+                if(s1.str() != s2.str())
+                {
+                    curr->version+=1;
+                    fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+                    check = true;
+                }
+            }
+            else
+            {
+                fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+                check = true;
+            }
+            curr = curr->next;
+        }
         
-        ifstream t1(commitHead->fileHead->name);
-        ostringstream s1;
-        s1<< t1.rdbuf();
-        cout << s1.str() << endl;
-        
-        // right now t2 does not retrieve the correct file
-        fstream t2(".minigit/"+commitHead->fileHead->name);
-        ostringstream s2;
-        s2<< t2.rdbuf();
-        cout << s2.str() << endl;
-        
-        
-        // else there has been changes
-        // update version number
-        // add new version to minigit
+        if(!check)
+        {
+            cout << "No changes made. Reverting to previous commit" << endl;
+            delete newNode;
+            return to_string(commits);
+        }
     }
-    
+        
     
     // Do the final update
     newNode->previous = commitHead;
@@ -247,11 +267,11 @@ string MiniGit::commit(string msg)
     commitHead = newNode;
     
     // update commits in hash table
+    // Not yet implemented
     
     
     //should return the commitID of the commited DLL node
-    string r = to_string(commits-1);
-    return r;
+    return to_string(commits-1);
     
 }
 
