@@ -7,6 +7,8 @@ using namespace std;
 // use this command to run the code
 // g++ --std=c++17 main_1.cpp ../code_1/miniGit.cpp ../code_1/hash.cpp -o a.out
 
+//g++ --std=c++17 ../app_1/main_1.cpp ../code_1/miniGit.cpp ../code_1/hash.cpp -o a.out
+
 /*
  * Purpose; displays a menu with options
  */
@@ -68,7 +70,7 @@ int main(int argc, char* argv[])
             // initialise a new repository
             case 1:
                 myGit.init(5);
-                myGit.printSearchTable();
+                //myGit.printSearchTable();
             break;
                 
             // add files to current commit
@@ -94,7 +96,7 @@ int main(int argc, char* argv[])
                 cout << "Enter a commit message: ";
                 getline(cin, message);
                 
-                while(!checkCommitMessage(message))// || myGit.node(message))
+                while(!checkCommitMessage(message) || myGit.node(message))
                 {
                     cout << "Enter a valid commit message: ";
                     getline(cin, message);
