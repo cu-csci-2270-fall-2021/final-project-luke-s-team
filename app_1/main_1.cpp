@@ -47,6 +47,15 @@ bool checkSearchKey(string key)
     return true;
 }
 
+bool checkCommitNum(string commitNum)
+{
+    // check to make sure string is a number
+    for(int i = 0; i < commitNum.size(); i+=1)
+        if(!isdigit(commitNum[i]))
+            return false;
+    return true;
+}
+
 int main(int argc, char* argv[]) 
 {
     bool menuOn = true;
@@ -57,6 +66,7 @@ int main(int argc, char* argv[])
     string fileName = "";
     string message = "";
     string searchKey = "";
+    string commitNum = "";
     
     while(menuOn)
     {
@@ -116,7 +126,13 @@ int main(int argc, char* argv[])
                 
             // check out specific version based on a unique commit option
             case 5:
-                cout << "not coded yet" << endl;
+                cout << "Enter a commit number to return to: ";
+                getline(cin,commitNum);
+                while(!checkCommitNum(commitNum)||stoi(commitNum)>myGit.getCommits() || stoi(commitNum) < 0)
+                {
+                    cout << "Enter a valid commit number: ";
+                    getline(cin,commitNum);
+                }
             break;
                 
             // Search commits based on key word
