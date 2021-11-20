@@ -51,6 +51,7 @@ HashNode* HashTable::searchItem(string key)
 //function to insert
 bool HashTable::insertItem(string key, int cNum)
 {
+    // word is not in hash, update with new word
     if(!searchItem(key))
     {
         int i = hashFunction(key);
@@ -61,8 +62,13 @@ bool HashTable::insertItem(string key, int cNum)
         
         return true;
     }
+    // word is already in hash, add cNum to its commmitNums
     else
-        cout << "Item already exists in list" << endl;
+    {
+        int i = hashFunction(key);
+        table[i]->commitNums.push_back(cNum);
+        
+    }
     return false;
 }
 
