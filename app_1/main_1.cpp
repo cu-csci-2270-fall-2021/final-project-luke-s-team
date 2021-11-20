@@ -70,7 +70,6 @@ int main(int argc, char* argv[])
             // initialise a new repository
             case 1:
                 myGit.init(5);
-                //myGit.printSearchTable();
             break;
                 
             // add files to current commit
@@ -103,6 +102,7 @@ int main(int argc, char* argv[])
                 }
                 
                 myGit.commit(message);
+                myGit.printSearchTable();
             break;
                 
             // Search commits based on key word
