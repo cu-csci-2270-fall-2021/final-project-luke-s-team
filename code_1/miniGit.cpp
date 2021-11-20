@@ -25,6 +25,11 @@ bool MiniGit::node(string message){
     return false;
 }
 
+int MiniGit::getCommits()
+{
+    return commits;
+}
+
 MiniGit::~MiniGit() {   
     // Any postprocessing that may be required
     
