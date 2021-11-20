@@ -15,10 +15,10 @@ HashNode* HashTable::createNode(string key, HashNode* next)
 
 HashTable::HashTable(int bsize)
 {
-    tableSize = bsize;
-    table[tableSize];
-    for(int i = 0; i < tableSize; i+=1)
-        table[i] = NULL;
+    tableSize= bsize;
+    table = new HashNode*[tableSize];
+    for(int i=0;i<bsize;i++)
+        table[i] = nullptr;
 }
 
 //function to calculate hash function
@@ -84,6 +84,7 @@ void HashTable::printTable()
 {
     for(int i = 0; i < tableSize; i+=1)
     {
+        cout << i << "// ";
         HashNode * curr = table[i];
         while(curr != NULL)
         {
@@ -96,6 +97,7 @@ void HashTable::printTable()
                 cout << ")-->";
             curr = curr->next;
         }
+        cout << endl;
     }
 }
 
