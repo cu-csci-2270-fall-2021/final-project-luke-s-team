@@ -65,8 +65,8 @@ bool HashTable::insertItem(string key, int cNum)
     // word is already in hash, add cNum to its commmitNums
     else
     {
-        int i = hashFunction(key);
-        table[i]->commitNums.push_back(cNum);
+        HashNode * hn = searchItem(key);
+        hn->commitNums.push_back(cNum);
         
     }
     return false;
