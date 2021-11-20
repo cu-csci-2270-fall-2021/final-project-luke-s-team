@@ -58,8 +58,7 @@ void MiniGit::init(int hashtablesize)
     fs::create_directory(".minigit");
     
     // create new hash table
-    // causes seg fault
-    //ht = new HashTable(hashtablesize);
+    ht = new HashTable(hashtablesize);
 
     
     commits = 0;
@@ -219,8 +218,8 @@ string MiniGit::commit(string msg)
         // if no changes do not commit
         bool check = false;
         
-        // check for any new files and no changes in those files
-        // do not commit if that is the case
+        // check for any new files and changes in files
+        // do not commit if neither is found
         // this loop also updates the directory with the new file if it was changed
         // also checks if the file of a different name is not in the directory and adds it
         FileNode * curr = commitHead->fileHead;
@@ -267,7 +266,22 @@ string MiniGit::commit(string msg)
     commitHead = newNode;
     
     // update commits in hash table
-    // Not yet implemented
+    string currS = "";
+    for(int i = 0; i < msg.size(); i+=1)
+    {
+        if(msg[i] == ' ')
+        {
+            ht->insertItem(currS, commits-1);
+            currS = "";
+        }
+        else if(i == msg.size()-1)
+        {
+            currS += msg[i];
+            ht->insertItem(currS, commits-1);
+        }
+        else
+            currS += msg[i];
+    }
     
     
     //should return the commitID of the commited DLL node
