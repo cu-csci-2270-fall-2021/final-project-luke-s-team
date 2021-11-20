@@ -305,9 +305,48 @@ string MiniGit::commit(string msg)
     
 }
 
-void MiniGit::checkout(string commitID) {
+void MiniGit::checkout(string commitID) 
+{
+    int commitNum = stoi(commitID);
+    if(commitNum == commitHead->commitID)
+    {
+        cout << "Currently on commit " << commitID << endl;
+        return;
+    }
+    
+    // double check with user 
+    bool check = false; 
+    char c = '';
+    cout << "You may lose all current local changes." << endl;
+    cout << "Do you want to continue? YES (y) NO (n): " << endl;
+    cin >> c;
    
-
+    while(c != 'y' || c != 'n' || c != 'Y' || c != 'N')
+    {
+        cout << "Do you want to continue? YES (y) NO (n): " << endl;
+        cin >> c;
+    }
+    
+    if(c == 'y' || c == 'Y')
+        check = true;
+    if(!check)
+    {
+        cout << "No changes will be made." << endl;
+        return;
+    }
+    
+    // get the node with the right commit   
+    BranchNode * curr = commitHead;
+    while(curr != NULL)
+    {
+        if(curr->commitID == commitNum)
+            break;
+        curr = curr->prev;
+    }
+    
+    // update the directory
+    
+        
 }
 
 
