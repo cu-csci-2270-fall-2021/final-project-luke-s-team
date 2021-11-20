@@ -178,6 +178,17 @@ void MiniGit::printSearchTable()
 
 void MiniGit::search(string key)
 {
+    // check if the key exists in the hash
+    if(ht->searchItem(key) != NULL)
+    {
+        HashNode * hn = ht->searchItem(key);
+        cout << hn->key << "(";
+        for(int j = 0; j < hn->commitNums.size(); j+=1)
+            cout << hn->commitNums[j] << ",";
+        cout << ")" << endl;
+    }
+    else
+        cout << "Key cannot be found." << endl;
 }
 
 
