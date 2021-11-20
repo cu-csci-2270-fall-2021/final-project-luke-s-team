@@ -39,6 +39,14 @@ bool checkCommitMessage(string message)
     return true;
 }
 
+bool checkSearchKey(string key)
+{
+    for(int i = 0; i < key.size(); i+=1)
+        if(key[i] == ' ')
+            return false;
+    return true;
+}
+
 int main(int argc, char* argv[]) 
 {
     bool menuOn = true;
@@ -48,6 +56,7 @@ int main(int argc, char* argv[])
     MiniGit myGit;
     string fileName = "";
     string message = "";
+    string searchKey = "";
     
     while(menuOn)
     {
@@ -105,14 +114,21 @@ int main(int argc, char* argv[])
                 myGit.printSearchTable();
             break;
                 
-            // Search commits based on key word
+            // check out specific version based on a unique commit option
             case 5:
                 cout << "not coded yet" << endl;
             break;
                 
-            // check out specific version based on a unique commit option
+            // Search commits based on key word
             case 6:
-                cout << "not coded yet" << endl;
+                cout << "Enter a key word to search for: ";
+                getline(cin,searchKey);
+                while(!checkSearchKey(searchKey))
+                {
+                    cout << "Enter a single word: ";
+                    getline(cin,searchKey);
+                }
+                myGit.search(searchKey);
             break;
                 
             // quit
