@@ -7,16 +7,18 @@ using namespace std;
 
 HashNode* HashTable::createNode(string key, HashNode* next)
 {
-    HashNode* nw = NULL;
+    HashNode* nw = new HashNode;
+    nw->key = key;
+    nw->next = next;
     return nw;
 }
 
 HashTable::HashTable(int bsize)
 {
-    tableSize = bsize;
-    table[tableSize];
-    for(int i = 0; i < tableSize; i+=1)
-        table[i] = NULL;
+    tableSize= bsize;
+    table = new HashNode*[tableSize];
+    for(int i=0;i<bsize;i++)
+        table[i] = nullptr;
 }
 
 //function to calculate hash function
@@ -27,15 +29,6 @@ unsigned int HashTable::hashFunction(string s)
     for(int i = 0; i < s.size(); i+=1)
         sum += s[i];
     sum %= tableSize;
-    
-    // use linear probing to fix collisions
-    while(table[sum] != NULL)
-    {
-        sum += 1;
-        if(sum < tableSize)
-            sum = 0;
-    }
-    
     return sum;
 }
 
@@ -43,9 +36,14 @@ unsigned int HashTable::hashFunction(string s)
 //function to search
 HashNode* HashTable::searchItem(string key)
 {
-    for(int i = 0; i < tableSize; i+=1)
-        if(table[i]->key == key)
-            return table[i];
+    int i = hashFunction(key);
+    HashNode * curr = table[i];
+    while(curr != NULL)
+    {
+        if(curr->key == key)
+            return curr;
+        curr = curr->next;
+    }
     return NULL; 
 }
 
@@ -53,13 +51,24 @@ HashNode* HashTable::searchItem(string key)
 //function to insert
 bool HashTable::insertItem(string key, int cNum)
 {
-    HashNode * newNode = new HashNode;
-    newNode -> key = key;
-    newNode -> commitNums.push_back(cNum);
-    
-    int hash = hashFunction(key);
-    table[hash] = newNode;
-    
+    // word is not in hash, update with new word
+    if(!searchItem(key))
+    {
+        int i = hashFunction(key);
+        // create new hash
+        HashNode * newHash = createNode(key,table[i]);
+        newHash -> commitNums.push_back(cNum);
+        table[i] = newHash;
+        
+        return true;
+    }
+    // word is already in hash, add cNum to its commmitNums
+    else
+    {
+        HashNode * hn = searchItem(key);
+        hn->commitNums.push_back(cNum);
+        
+    }
     return false;
 }
 
@@ -69,26 +78,29 @@ bool HashTable::insertItem(string key, int cNum)
 ** the string key and the commit number (separated by comma) within parenthesis
 ** e.g. the key is science and commit numbers are 1 and 4. The key science
 ** is hashed to position 0. So the print format will be-
-
 0|| science(1,4,)
 1|| 
 2|| 
 3|| 
 4|| difficult(3,)-->fun(2,)-->computer(0,)
-
 */
 void HashTable::printTable()
 {
     for(int i = 0; i < tableSize; i+=1)
     {
-        if(table[i] != NULL)
+        cout << i << "// ";
+        HashNode * curr = table[i];
+        while(curr != NULL)
         {
-            cout << table[i]->key << "(";
-            for(int j = 0; j < table[i]->commitNums.size();j+=1)
-                cout << table[i]->commitNums[j] << ", ";
+            cout << curr->key << "(";
+            for(int j = 0; j < curr->commitNums.size(); j+=1)
+                cout << curr->commitNums[j] << ",";
+            if(curr->next == NULL)
+                cout << ")";
+            else
+                cout << ")-->";
+            curr = curr->next;
         }
         cout << endl;
     }
 }
-
-

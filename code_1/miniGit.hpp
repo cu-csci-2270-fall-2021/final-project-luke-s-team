@@ -44,7 +44,6 @@ public:
     void checkout(string commitID);
     void printSearchTable();
     bool node(string message);
-    
+    int getCommits();
     
 };
-

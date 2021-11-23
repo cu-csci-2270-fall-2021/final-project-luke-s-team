@@ -11,25 +11,28 @@ namespace fs = std::filesystem;
 
 
 MiniGit::MiniGit() {
-    fs::remove_all(".minigit");
-    fs::create_directory(".minigit");
+    //fs::remove_all(".minigit");
+    //fs::create_directory(".minigit");
 }
 
 bool MiniGit::node(string message){
     BranchNode *branchNode = commitHead;
     if(message == branchNode->commitMessage) return true;
     while(branchNode != NULL){
-        branchNode = branchNode->next;
         if(message == branchNode->commitMessage) return true;
+        branchNode = branchNode->next;
     }
     return false;
 }
 
+int MiniGit::getCommits()
+{
+    return commits;
+}
 
 MiniGit::~MiniGit() {   
     // Any postprocessing that may be required
     
-    // delete the singly linked list
     FileNode * crawler = commitHead->fileHead;
     while(commitHead->fileHead != NULL)
     {
@@ -49,15 +52,19 @@ MiniGit::~MiniGit() {
     }
     commitHead = NULL;
     
-    //fs::remove_all(".minigit");
-    //fs::remove_all(".new");
+    fs::remove_all(".minigit");
 }
 
 void MiniGit::init(int hashtablesize) 
-{
+{ 
+    
+    // initialize new repository
+    fs::remove_all(".minigit");
+    fs::create_directory(".minigit");
+    
     // create new hash table
-    // causes seg fault
-    //ht = new HashTable(hashtablesize);
+    ht = new HashTable(hashtablesize);
+
     
     commits = 0;
 
@@ -82,27 +89,27 @@ void MiniGit::add(string fileName)
     if(commitHead->fileHead == NULL)
     {
         commitHead -> fileHead = newFile;
-        cout << commitHead->fileHead->name << endl;
     }
     // add node to end of list
     else
     {
-        // check that the file is not already part of the list
-        FileNode * crawler = commitHead->fileHead;
         bool check = false;
+        // check that the file does not already exist
+        FileNode * crawler = commitHead->fileHead;
         while(crawler != NULL)
         {
             if(crawler->name == fileName)
                 check = true;
             crawler = crawler->next;
         }
+        // check that the file exist in the directory
+        if(!fs::exists(fileName))
+            check = true;
+        
         // if file was already in list prompt the user to try again
         if(check)
         {
-            fileName = "";
-            cout << "Enter a file name: ";
-            cin >> fileName;
-            add(fileName);
+            cout << "Must enter valid file name" << endl;
         }
         // add the new file to the end of the list
         else
@@ -134,7 +141,7 @@ void MiniGit::rm(string fileName)
                 check = true;
             crawler = crawler->next;
         }
-         
+        
         //  file not in list
         if(!check)
             cout << "File is not in the list" << endl;
@@ -176,6 +183,17 @@ void MiniGit::printSearchTable()
 
 void MiniGit::search(string key)
 {
+    // check if the key exists in the hash
+    if(ht->searchItem(key) != NULL)
+    {
+        HashNode * hn = ht->searchItem(key);
+        cout << hn->key << "(";
+        for(int j = 0; j < hn->commitNums.size(); j+=1)
+            cout << hn->commitNums[j] << ",";
+        cout << ")" << endl;
+    }
+    else
+        cout << "Key cannot be found." << endl;
 }
 
 
@@ -188,30 +206,145 @@ string MiniGit::commit(string msg)
     newNode->commitID = commits;
     newNode -> next = NULL;
     
-    commits += 1;
+    
     
     newNode->fileHead = commitHead->fileHead;
     
-    // empty starting repository
+    // empty starting repository add everything from the SLL
     if(commits == 0)
+    {
+        // starting with no prev null
         newNode->previous = NULL;
+        
+        // add files to minigit
+        FileNode * curr = commitHead->fileHead;
+        while(curr != NULL)
+        {
+            fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+            curr = curr->next;
+        }
+    }
+    // will be copying/adding files
     else
+    {
+        // has a prev node, set here
         newNode->previous = commitHead;
+        
+        // check if changes
+        // if no changes do not commit
+        bool check = false;
+        
+        // check for any new files and changes in files
+        // do not commit if neither is found
+        // this loop also updates the directory with the new file if it was changed
+        // also checks if the file of a different name is not in the directory and adds it
+        FileNode * curr = commitHead->fileHead;
+        while(curr != NULL)
+        {
+            if(fs::exists(".minigit/"+curr->name+to_string(curr->version)))
+            {
+                fstream t1(curr->name);
+                ostringstream s1;
+                s1<< t1.rdbuf();
+                
+                fstream t2(".minigit/"+curr->name+to_string(curr->version));
+                ostringstream s2;
+                s2<< t2.rdbuf();
+                
+                if(s1.str() != s2.str())
+                {
+                    curr->version+=1;
+                    fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+                    check = true;
+                }
+            }
+            else
+            {
+                fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+                check = true;
+            }
+            curr = curr->next;
+        }
+        
+        if(!check)
+        {
+            cout << "No changes made. Reverting to previous commit" << endl;
+            delete newNode;
+            return to_string(commits);
+        }
+    }
+        
     
+    // Do the final update
+    newNode->previous = commitHead;
+    
+    commits += 1;
     commitHead = newNode;
     
-    // update commits
+    // update commits in hash table
+    string currS = "";
+    for(int i = 0; i < msg.size(); i+=1)
+    {
+        if(msg[i] == ' ')
+        {
+            ht->insertItem(currS, commits-1);
+            currS = "";
+        }
+        else if(i == msg.size()-1)
+        {
+            currS += msg[i];
+            ht->insertItem(currS, commits-1);
+        }
+        else
+            currS += msg[i];
+    }
     
     
     //should return the commitID of the commited DLL node
-    string r = to_string(commits-1);
-    return r;
+    return to_string(commits-1);
     
 }
 
-void MiniGit::checkout(string commitID) {
+void MiniGit::checkout(string commitID) 
+{
+    int commitNum = stoi(commitID);
+    if(commitNum == commitHead->commitID)
+    {
+        cout << "Currently on commit " << commitID << endl;
+        return;
+    }
+    
+    // double check with user 
+    bool check = false; 
+    char c;
+    cout << "You may lose all current local changes." << endl;
+    cout << "Do you want to continue? YES (y) NO (n): " << endl;
+    cin >> c;
    
-
+    while(c != 'y' || c != 'n' || c != 'Y' || c != 'N')
+    {
+        cout << "Do you want to continue? YES (y) NO (n): " << endl;
+        cin >> c;
+    }
+    
+    if(c == 'y' || c == 'Y')
+        check = true;
+    if(!check)
+    {
+        cout << "No changes will be made." << endl;
+        return;
+    }
+    
+    // get the node with the right commit   
+    BranchNode * curr = commitHead;
+    while(curr != NULL)
+    {
+        if(curr->commitID == commitNum)
+            break;
+        curr = curr->next;
+    }
+    
+    // update the directory
+    
+        
 }
-
-

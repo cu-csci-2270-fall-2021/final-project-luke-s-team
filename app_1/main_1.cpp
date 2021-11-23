@@ -1,80 +1,18 @@
 #include <iostream>
 #include "../code_1/miniGit.hpp"
 #include <filesystem>
-<<<<<<< HEAD
-namespace fs = std::filesystem;
-
-#include "miniGit.hpp"
-#include <vector>
-
-bool node(string message){
-    BranchNode *branchNode = commitHead;
-    if(message == branchNode->commitMessage) return true;
-    for(int node = 0; commits > node; node++) {
-        branchNode = branchNode->next;
-        if(message == branchNode->commitMessage) return true;
-    }
-    return false;
-}
-
-<<<<<<< HEAD
-// check to make sure the commit message is a valid length of three words
-bool checkCommitMessage(string message)
-{
-    int words = 0;
-    for(int length = 0; message.size() > length; length++)
-        if(message[length] == ' ')
-            words++;
-    if(words > 2 || node)
-        return false;
-    return true;
-=======
-MiniGit::MiniGit() {
-    fs::remove_all(".minigit");
-    fs::create_directory(".minigit");
->>>>>>> 3b172db1aeac25fd6ddc57ea4bc56bc1ff28f144
-}
-
-MiniGit::~MiniGit() {   
-    // Any postprocessing that may be required
-    
-    // delete the singly linked list
-    FileNode * crawler = commitHead->fileHead;
-    while(commitHead->fileHead != NULL)
-    {
-        crawler = commitHead->fileHead -> next;
-        delete commitHead->fileHead;
-        commitHead->fileHead = crawler;
-    }
-    commitHead->fileHead = NULL;
-    
-    // delete the doubly linked list
-    BranchNode * crawler2 = commitHead;
-    while(commitHead != NULL)
-    {
-        crawler2 = commitHead -> next;
-        delete commitHead;
-        commitHead = crawler2;
-    }
-    commitHead = NULL;
-    
-    //fs::remove_all(".minigit");
-    //fs::remove_all(".new");
-}
-
-void MiniGit::init(int hashtablesize) 
-=======
 #include <string>
 using namespace std;
 // temporary comment, remove befor turning in
 // use this command to run the code
 // g++ --std=c++17 main_1.cpp ../code_1/miniGit.cpp ../code_1/hash.cpp -o a.out
 
+//g++ --std=c++17 ../app_1/main_1.cpp ../code_1/miniGit.cpp ../code_1/hash.cpp -o a.out
+
 /*
  * Purpose; displays a menu with options
  */
 void displayMenu()
->>>>>>> 7388eafd58848916203494503f779e7318ccd197
 {
     cout << "Select a numerical option:" << endl;
     cout << "+=====Main Menu=========+" << endl;
@@ -101,6 +39,23 @@ bool checkCommitMessage(string message)
     return true;
 }
 
+bool checkSearchKey(string key)
+{
+    for(int i = 0; i < key.size(); i+=1)
+        if(key[i] == ' ')
+            return false;
+    return true;
+}
+
+bool checkCommitNum(string commitNum)
+{
+    // check to make sure string is a number
+    for(int i = 0; i < commitNum.size(); i+=1)
+        if(!isdigit(commitNum[i]))
+            return false;
+    return true;
+}
+
 int main(int argc, char* argv[]) 
 {
     bool menuOn = true;
@@ -110,6 +65,8 @@ int main(int argc, char* argv[])
     MiniGit myGit;
     string fileName = "";
     string message = "";
+    string searchKey = "";
+    string commitNum = "";
     
     while(menuOn)
     {
@@ -132,7 +89,6 @@ int main(int argc, char* argv[])
             // initialise a new repository
             case 1:
                 myGit.init(5);
-                myGit.printSearchTable();
             break;
                 
             // add files to current commit
@@ -158,23 +114,37 @@ int main(int argc, char* argv[])
                 cout << "Enter a commit message: ";
                 getline(cin, message);
                 
-                while(!checkCommitMessage(message))// || myGit.node(message))
+                while(!checkCommitMessage(message) || myGit.node(message))
                 {
                     cout << "Enter a valid commit message: ";
                     getline(cin, message);
                 }
                 
                 myGit.commit(message);
-            break;
-                
-            // Search commits based on key word
-            case 5:
-                cout << "not coded yet" << endl;
+                myGit.printSearchTable();
             break;
                 
             // check out specific version based on a unique commit option
+            case 5:
+                cout << "Enter a commit number to return to: ";
+                getline(cin,commitNum);
+                while(!checkCommitNum(commitNum)||stoi(commitNum)>myGit.getCommits() || stoi(commitNum) < 0)
+                {
+                    cout << "Enter a valid commit number: ";
+                    getline(cin,commitNum);
+                }
+            break;
+                
+            // Search commits based on key word
             case 6:
-                cout << "not coded yet" << endl;
+                cout << "Enter a key word to search for: ";
+                getline(cin,searchKey);
+                while(!checkSearchKey(searchKey))
+                {
+                    cout << "Enter a single word: ";
+                    getline(cin,searchKey);
+                }
+                myGit.search(searchKey);
             break;
                 
             // quit
@@ -189,4 +159,3 @@ int main(int argc, char* argv[])
    
     return 0;
 }
-
