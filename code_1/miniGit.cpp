@@ -88,6 +88,11 @@ void MiniGit::add(string fileName)
     // add node to head if head is null
     if(commitHead->fileHead == NULL)
     {
+        // check file and update version if already in the minigit
+        for(int i = 0; i < commits; i+=1)
+            if(fs::exists(".minigit/"+fileName+to_string(i)))
+                newFile -> version += 1;
+        
         commitHead -> fileHead = newFile;
     }
     // add node to end of list
@@ -114,6 +119,11 @@ void MiniGit::add(string fileName)
         // add the new file to the end of the list
         else
         {
+            // check file and update version if already in the minigit
+            for(int i = 0; i < commits; i+=1)
+                if(fs::exists(".minigit/"+fileName+to_string(i)))
+                    newFile -> version += 1;
+            
             crawler = commitHead->fileHead;
             while(crawler->next!=NULL)
                 crawler = crawler->next;
@@ -206,8 +216,6 @@ string MiniGit::commit(string msg)
     newNode->commitID = commits+1;
     newNode -> next = NULL;
     newNode -> fileHead = NULL;
-    
-     // *** seg fault occurs if copy a file more than 2 times ***
     
     // empty starting repository add everything from the SLL
     if(commits == 0)
