@@ -84,7 +84,7 @@ void MiniGit::add(string fileName)
     newFile -> name = fileName;
     newFile -> version = 0;
     newFile -> next = NULL;
-    
+    newFile->repository = fileName + "0";
     // add node to head if head is null
     if(commitHead->fileHead == NULL)
     {
