@@ -13,6 +13,7 @@ struct FileNode {
     string name;
     int version;
     FileNode* next;
+    string repository;
 };
 
 struct BranchNode {
