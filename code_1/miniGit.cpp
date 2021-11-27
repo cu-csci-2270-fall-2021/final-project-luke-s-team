@@ -84,10 +84,15 @@ void MiniGit::add(string fileName)
     newFile -> name = fileName;
     newFile -> version = 0;
     newFile -> next = NULL;
-    
+    newFile->repository = fileName + "0";
     // add node to head if head is null
     if(commitHead->fileHead == NULL)
     {
+        // check file and update version if already in the minigit
+        for(int i = 0; i < commits; i+=1)
+            if(fs::exists(".minigit/"+fileName+to_string(i)))
+                newFile -> version += 1;
+        
         commitHead -> fileHead = newFile;
     }
     // add node to end of list
@@ -114,6 +119,11 @@ void MiniGit::add(string fileName)
         // add the new file to the end of the list
         else
         {
+            // check file and update version if already in the minigit
+            for(int i = 0; i < commits; i+=1)
+                if(fs::exists(".minigit/"+fileName+to_string(i)))
+                    newFile -> version += 1;
+            
             crawler = commitHead->fileHead;
             while(crawler->next!=NULL)
                 crawler = crawler->next;
@@ -203,12 +213,9 @@ string MiniGit::commit(string msg)
     // create new node
     BranchNode * newNode = new BranchNode;
     newNode->commitMessage = msg;
-    newNode->commitID = commits;
+    newNode->commitID = commits+1;
     newNode -> next = NULL;
-    
-    
-    
-    newNode->fileHead = commitHead->fileHead;
+    newNode -> fileHead = NULL;
     
     // empty starting repository add everything from the SLL
     if(commits == 0)
@@ -226,10 +233,7 @@ string MiniGit::commit(string msg)
     }
     // will be copying/adding files
     else
-    {
-        // has a prev node, set here
-        newNode->previous = commitHead;
-        
+    {        
         // check if changes
         // if no changes do not commit
         bool check = false;
@@ -238,11 +242,13 @@ string MiniGit::commit(string msg)
         // do not commit if neither is found
         // this loop also updates the directory with the new file if it was changed
         // also checks if the file of a different name is not in the directory and adds it
+        
         FileNode * curr = commitHead->fileHead;
         while(curr != NULL)
         {
             if(fs::exists(".minigit/"+curr->name+to_string(curr->version)))
             {
+                // get strings of each file
                 fstream t1(curr->name);
                 ostringstream s1;
                 s1<< t1.rdbuf();
@@ -251,6 +257,7 @@ string MiniGit::commit(string msg)
                 ostringstream s2;
                 s2<< t2.rdbuf();
                 
+                // compare to check changes
                 if(s1.str() != s2.str())
                 {
                     curr->version+=1;
@@ -316,18 +323,12 @@ void MiniGit::checkout(string commitID)
     
     // double check with user 
     bool check = false; 
-    char c;
+    string c;
     cout << "You may lose all current local changes." << endl;
     cout << "Do you want to continue? YES (y) NO (n): " << endl;
-    cin >> c;
-   
-    while(c != 'y' || c != 'n' || c != 'Y' || c != 'N')
-    {
-        cout << "Do you want to continue? YES (y) NO (n): " << endl;
-        cin >> c;
-    }
+    getline(cin, c);
     
-    if(c == 'y' || c == 'Y')
+    if(c == "y" || c == "Y")
         check = true;
     if(!check)
     {
@@ -341,10 +342,24 @@ void MiniGit::checkout(string commitID)
     {
         if(curr->commitID == commitNum)
             break;
-        curr = curr->next;
+        curr = curr->previous;
     }
     
     // update the directory
+    FileNode * currFile = curr -> fileHead;
     
-        
+    while(currFile != NULL)
+    {   
+        if(fs::exists(currFile->name) && fs::exists(".minigit/"+currFile->name+to_string(currFile->version)))
+        {   
+            // causes seg fault
+            fs::copy_file(".minigit/"+currFile->name+to_string(currFile->version),currFile->name);
+            
+            cout << "copying file" << endl;
+        }
+        else
+            cout << "file DNE" << endl;
+            
+        currFile = currFile -> next;
+    }
 }
