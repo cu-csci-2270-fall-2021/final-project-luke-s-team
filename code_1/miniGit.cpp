@@ -228,40 +228,48 @@ string MiniGit::commit(string msg)
         while(curr != NULL)
         {
             fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+            //fs::copy_file(".minigit/" + curr->repository + ".txt", ".minigit/" + curr->name + to_string(newNode->commitID) + ".txt");
             curr = curr->next;
         }
     }
     // will be copying/adding files
     else
-    {        
+    {
         // check if changes
         // if no changes do not commit
         bool check = false;
-        
+
         // check for any new files and changes in files
         // do not commit if neither is found
         // this loop also updates the directory with the new file if it was changed
         // also checks if the file of a different name is not in the directory and adds it
-        
-        FileNode * curr = commitHead->fileHead;
-        while(curr != NULL)
+
+        FileNode* curr = commitHead->fileHead;
+        while (curr != NULL)
         {
-            if(fs::exists(".minigit/"+curr->name+to_string(curr->version)))
+            if (fs::exists(".minigit/" + curr->name + to_string(curr->version)))
             {
                 // get strings of each file
                 fstream t1(curr->name);
                 ostringstream s1;
-                s1<< t1.rdbuf();
-                
-                fstream t2(".minigit/"+curr->name+to_string(curr->version));
+                s1 << t1.rdbuf();
+
+                fstream t2(".minigit/" + curr->name + to_string(curr->version));
                 ostringstream s2;
-                s2<< t2.rdbuf();
-                
+                s2 << t2.rdbuf();
+
                 // compare to check changes
-                if(s1.str() != s2.str())
+                if (s1.str() != s2.str())
                 {
-                    curr->version+=1;
-                    fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+                    curr->version += 1;
+                    fs::copy_file(curr->name, ".minigit/" + curr->name + to_string(curr->version));
+                    check = true;
+                }
+            }
+            else
+            {
+                fs::copy_file(curr->name, ".minigit/" + curr->name + to_string(curr->version));
+                //fs::copy_file(".minigit/" + curr->repository + ".txt", ".minigit/" + curr->name + to_string(newNode->commitID) + ".txt");
                     check = true;
                 }
             }
@@ -362,4 +370,8 @@ void MiniGit::checkout(string commitID)
             
         currFile = currFile -> next;
     }
+//<<<<<<< HEAD
 }
+/*=======
+}
+>>>>>>> bea584d174ffec855387fa8d5c5b491978448675*/
