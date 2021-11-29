@@ -359,19 +359,37 @@ void MiniGit::checkout(string commitID)
     while(currFile != NULL)
     {   
         if(fs::exists(currFile->name) && fs::exists(".minigit/"+currFile->name+to_string(currFile->version)))
-        {   
-            // causes seg fault
-            fs::copy_file(".minigit/"+currFile->name+to_string(currFile->version),currFile->name);
+        {
             
-            cout << "copying file" << endl;
+            
+            // get string of file in the curr directory
+            fstream myFileF;
+            myFileF.open(currFile->name);
+            ostringstream myFileS;
+            myFileS<< myFileF.rdbuf();
+   
+            // get string of the file in the minigit
+            fstream gitFileF;
+            gitFileF.open(".minigit/"+currFile->name+to_string(currFile->version));
+            ostringstream gitFileS;
+            gitFileS<< gitFileF.rdbuf();
+            
+            cout << "Copying: " << gitFileS.str() << " to: " << myFileS.str() << endl;
+           
+            // replace string in directory with string from minigit 
+            ofstream myFileO;
+            myFileO.open(currFile->name);
+            myFileO << gitFileS.str();
+            myFileO.close();
+            
+            myFileF.close();
+            gitFileF.close();
+            
+            
         }
         else
             cout << "file DNE" << endl;
             
         currFile = currFile -> next;
     }
-//<<<<<<< HEAD
 }
-/*=======
-}
->>>>>>> bea584d174ffec855387fa8d5c5b491978448675*/
