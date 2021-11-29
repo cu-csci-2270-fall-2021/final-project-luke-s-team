@@ -43,3 +43,41 @@ string test_insert(string arr[], int len, int tabSize)
     string output = testing::internal::GetCapturedStdout();
     return output;
 }
+
+string test_search(string str, string arr[], int len, int tabSize)
+{
+    testing::internal::CaptureStdout();
+    HashTable* ht = new HashTable(tabSize);
+    
+    for(int i=0;i<len;i++)
+    {
+        ht->insertItem(arr[i],i);
+    }
+    
+    HashNode * hn = ht->searchItem(str);
+    if(hn == NULL)
+        cout << "Key cannot be found." << endl;
+    else
+    {
+        cout << hn->key << "(";
+        for(int j = 0; j < hn->commitNums.size(); j+=1)
+            cout << hn->commitNums[j] << ",";
+        cout << ")" << endl;
+    }
+    
+    string output = testing::internal::GetCapturedStdout();
+    return output;
+}
+
+string test_hash(string str, int tabSize)
+{
+    testing::internal::CaptureStdout();
+    
+    HashTable* ht = new HashTable(tabSize);
+    unsigned int num = ht -> hashFunction(str);
+    
+    cout << "Hashed: " << str << endl << "Result: " << num << endl;
+    
+    string output = testing::internal::GetCapturedStdout();
+    return output;
+}
