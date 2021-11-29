@@ -76,17 +76,140 @@ TEST_F(test_x, TestInsert){
     string expected;
        
     int len = 5;
-    
     string commits[] = {"computer", "science", "fun", "difficult", "science"};
     int tabSize = 5;
-    
     result = test_insert(commits, len, tabSize);
-    
     expected = "0|| science(1,4,)\n1|| \n2|| \n3|| \n4|| difficult(3,)-->fun(2,)-->computer(0,)\n";
-    
     ASSERT_EQ(expected, result);
-    add_points_to_grade(6);
+    add_points_to_grade(10);
+    
+    int len1 = 1;
+    string commits1[] = {""};
+    int tabSize1 = 5;
+    result = test_insert(commits1, len1, tabSize1);
+    expected = "0|| (0,)\n1|| \n2|| \n3|| \n4|| \n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(10);
+    
+    int len2 = 2;
+    string commits2[] = {"fun","fun"};
+    int tabSize2 = 5;
+    result = test_insert(commits2, len2, tabSize2);
+    expected = "0|| \n1|| \n2|| \n3|| \n4|| fun(0,1,)\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(10);
+    
+    int len3 = 8;
+    string commits3[] = {"fun","fun","yay","wonderful","hard","difficult","computer","software"};
+    int tabSize3 = 5;
+    result = test_insert(commits3, len3, tabSize3);
+    expected = "0|| software(7,)-->hard(4,)\n1|| \n2|| wonderful(3,)\n3|| \n4|| computer(6,)-->difficult(5,)-->yay(2,)-->fun(0,1,)\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(10);
 
+    
 }
 
 //TODO add more tests for insert. Design tests for search from hashTable.
+
+TEST_F(test_x,TestSearch)
+{
+    string result;
+    string expected;
+    
+    string str = "computer";
+    int len = 5;
+    string commits[] = {"computer", "science", "fun", "difficult", "science"};
+    int tabSize = 5;
+    result = test_search(str,commits, len, tabSize);
+    expected = "computer(0,)\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(6);
+    
+    string str1 = "science";
+    int len1 = 5;
+    string commits1[] = {"computer", "science", "fun", "difficult", "science"};
+    int tabSize1 = 5;
+    result = test_search(str1,commits1, len1, tabSize1);
+    expected = "science(1,4,)\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(6);
+    
+    string str3 = "yay";
+    int len3 = 5;
+    string commits3[] = {"computer", "science", "fun", "difficult", "science"};
+    int tabSize3 = 5;
+    result = test_search(str3,commits3, len3, tabSize3);
+    expected = "Key cannot be found.\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(6);
+    
+    string str4 = "computer";
+    int len4 = 5;
+    string commits4[] = {"", "", "", "", ""};
+    int tabSize4 = 5;
+    result = test_search(str4,commits4, len4, tabSize4);
+    expected = "Key cannot be found.\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(6);
+    
+    string str5 = "";
+    int len5 = 5;
+    string commits5[] = {"computer", "science", "fun", "difficult", "science"};
+    int tabSize5 = 5;
+    result = test_search(str5,commits5, len5, tabSize5);
+    expected = "Key cannot be found.\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(6);
+}
+
+TEST_F(test_x,TestHash)
+{
+    string result;
+    string expected;
+    
+    string str = "";
+    int tabSize = 0;
+    
+    str = "";
+    tabSize = 5;
+    result = test_hash(str,tabSize);
+    expected = "Hashed: \nResult: 0\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(5);
+    
+    str = "science";
+    tabSize = 5;
+    result = test_hash(str,tabSize);
+    expected = "Hashed: science\nResult: 0\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(5);
+    
+    str = "fun";
+    tabSize = 5;
+    result = test_hash(str,tabSize);
+    expected = "Hashed: fun\nResult: 4\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(5);
+    
+    str = "fun";
+    tabSize = 37;
+    result = test_hash(str,tabSize);
+    expected = "Hashed: fun\nResult: 33\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(5);
+    
+    str = "1";
+    tabSize = 5;
+    result = test_hash(str,tabSize);
+    expected = "Hashed: 1\nResult: 4\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(5);
+    
+    str = "13a j%7X";
+    tabSize = 29;
+    result = test_hash(str,tabSize);
+    expected = "Hashed: 13a j%7X\nResult: 22\n";
+    ASSERT_EQ(expected, result);
+    add_points_to_grade(5);
+}
