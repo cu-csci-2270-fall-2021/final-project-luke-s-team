@@ -33,6 +33,9 @@ int MiniGit::getCommits()
 MiniGit::~MiniGit() {   
     // Any postprocessing that may be required
     
+    if(!fs::exists(".minigit"))
+        return;
+    
     FileNode * crawler = commitHead->fileHead;
     while(commitHead->fileHead != NULL)
     {
@@ -77,8 +80,21 @@ void MiniGit::init(int hashtablesize)
     commitHead->previous = NULL;
 }
 
+// check file and update version if already in the minigit
+/*
+for(int i = 0; i < commits; i+=1)
+    if(fs::exists(".minigit/"+fileName+to_string(i)))
+        newFile -> version += 1;
+*/
+
 void MiniGit::add(string fileName) 
 {
+    // check minigit exists
+    if(!fs::exists(".minigit"))
+    {
+        cout << "Must intialize" << endl;
+        return;
+    }
     // create new node
     FileNode * newFile = new FileNode;
     newFile -> name = fileName;
@@ -88,11 +104,6 @@ void MiniGit::add(string fileName)
     // add node to head if head is null
     if(commitHead->fileHead == NULL)
     {
-        // check file and update version if already in the minigit
-        for(int i = 0; i < commits; i+=1)
-            if(fs::exists(".minigit/"+fileName+to_string(i)))
-                newFile -> version += 1;
-        
         commitHead -> fileHead = newFile;
     }
     // add node to end of list
@@ -119,11 +130,6 @@ void MiniGit::add(string fileName)
         // add the new file to the end of the list
         else
         {
-            // check file and update version if already in the minigit
-            for(int i = 0; i < commits; i+=1)
-                if(fs::exists(".minigit/"+fileName+to_string(i)))
-                    newFile -> version += 1;
-            
             crawler = commitHead->fileHead;
             while(crawler->next!=NULL)
                 crawler = crawler->next;
@@ -134,6 +140,12 @@ void MiniGit::add(string fileName)
 
 void MiniGit::rm(string fileName) 
 {
+    // check minigit exists
+    if(!fs::exists(".minigit"))
+    {
+        cout << "Must intialize" << endl;
+        return;
+    }
     // check list is not empty
     if(commitHead->fileHead == NULL)
     {
@@ -193,6 +205,12 @@ void MiniGit::printSearchTable()
 
 void MiniGit::search(string key)
 {
+    // check minigit exists
+    if(!fs::exists(".minigit"))
+    {
+        cout << "Must intialize" << endl;
+        return;
+    }
     // check if the key exists in the hash
     if(ht->searchItem(key) != NULL)
     {
@@ -210,12 +228,19 @@ void MiniGit::search(string key)
 
 string MiniGit::commit(string msg) 
 {
+    // check minigit exists
+    if(!fs::exists(".minigit"))
+    {
+        cout << "Must intialize" << endl;
+        return "";
+    }
     // create new node
     BranchNode * newNode = new BranchNode;
     newNode->commitMessage = msg;
     newNode->commitID = commits+1;
     newNode -> next = NULL;
     newNode -> fileHead = NULL;
+    //newNode->fileHead = commitHead->fileHead;
     
     // empty starting repository add everything from the SLL
     if(commits == 0)
@@ -228,50 +253,43 @@ string MiniGit::commit(string msg)
         while(curr != NULL)
         {
             fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
-            //fs::copy_file(".minigit/" + curr->repository + ".txt", ".minigit/" + curr->name + to_string(newNode->commitID) + ".txt");
             curr = curr->next;
         }
     }
     // will be copying/adding files
     else
-    {
+    {        
         // check if changes
         // if no changes do not commit
         bool check = false;
-
+        
         // check for any new files and changes in files
         // do not commit if neither is found
         // this loop also updates the directory with the new file if it was changed
         // also checks if the file of a different name is not in the directory and adds it
-
-        FileNode* curr = commitHead->fileHead;
-        while (curr != NULL)
+        
+        FileNode * curr = commitHead->fileHead;
+        while(curr != NULL)
         {
-            if (fs::exists(".minigit/" + curr->name + to_string(curr->version)))
+            if(fs::exists(".minigit/"+curr->name+to_string(curr->version)))
             {
                 // get strings of each file
                 fstream t1(curr->name);
                 ostringstream s1;
-                s1 << t1.rdbuf();
-
-                fstream t2(".minigit/" + curr->name + to_string(curr->version));
+                s1<< t1.rdbuf();
+                
+                fstream t2(".minigit/"+curr->name+to_string(curr->version));
                 ostringstream s2;
-                s2 << t2.rdbuf();
-
+                s2<< t2.rdbuf();
+                
                 // compare to check changes
-                if (s1.str() != s2.str())
+                if(s1.str() != s2.str())
                 {
-                    curr->version += 1;
-                    fs::copy_file(curr->name, ".minigit/" + curr->name + to_string(curr->version));
-                    check = true;
+                    curr->version+=1;
+                    fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
                 }
-            }
-            else
-            {
-                fs::copy_file(curr->name, ".minigit/" + curr->name + to_string(curr->version));
-                //fs::copy_file(".minigit/" + curr->repository + ".txt", ".minigit/" + curr->name + to_string(newNode->commitID) + ".txt");
+                else
                     check = true;
-                }
             }
             else
             {
@@ -292,6 +310,7 @@ string MiniGit::commit(string msg)
     
     // Do the final update
     newNode->previous = commitHead;
+    newNode->fileHead = commitHead->fileHead;
     
     commits += 1;
     commitHead = newNode;
@@ -322,6 +341,12 @@ string MiniGit::commit(string msg)
 
 void MiniGit::checkout(string commitID) 
 {
+    // check minigit exists
+    if(!fs::exists(".minigit"))
+    {
+        cout << "Must intialize" << endl;
+        return;
+    }
     int commitNum = stoi(commitID);
     if(commitNum == commitHead->commitID)
     {
@@ -354,14 +379,14 @@ void MiniGit::checkout(string commitID)
     }
     
     // update the directory
+    cout << curr->commitID << endl;
     FileNode * currFile = curr -> fileHead;
     
     while(currFile != NULL)
     {   
         if(fs::exists(currFile->name) && fs::exists(".minigit/"+currFile->name+to_string(currFile->version)))
         {
-            
-            
+
             // get string of file in the curr directory
             fstream myFileF;
             myFileF.open(currFile->name);
@@ -383,9 +408,7 @@ void MiniGit::checkout(string commitID)
             myFileO.close();
             
             myFileF.close();
-            gitFileF.close();
-            
-            
+            gitFileF.close(); 
         }
         else
             cout << "file DNE" << endl;
@@ -393,3 +416,4 @@ void MiniGit::checkout(string commitID)
         currFile = currFile -> next;
     }
 }
+
