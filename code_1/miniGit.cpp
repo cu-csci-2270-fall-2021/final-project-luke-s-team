@@ -95,6 +95,12 @@ void MiniGit::add(string fileName)
         cout << "Must intialize" << endl;
         return;
     }
+    // check on right commit
+    if(commitHead->commitID != commits)
+    {
+        cout << "Not on most current commit. Cannot Add, remove, or commit." << endl;
+        return;
+    }
     // create new node
     FileNode * newFile = new FileNode;
     newFile -> name = fileName;
@@ -146,6 +152,13 @@ void MiniGit::rm(string fileName)
         cout << "Must intialize" << endl;
         return;
     }
+    // check on right commit
+    if(commitHead->commitID != commits)
+    {
+        cout << "Not on most current commit. Cannot Add, remove, or commit." << endl;
+        return;
+    }
+    
     // check list is not empty
     if(commitHead->fileHead == NULL)
     {
@@ -234,6 +247,14 @@ string MiniGit::commit(string msg)
         cout << "Must intialize" << endl;
         return "";
     }
+    
+    // check on right commit
+    if(commitHead->commitID != commits)
+    {
+        cout << "Not on most current commit. Cannot Add, remove, or commit." << endl;
+        return "";
+    }
+    
     // create new node
     BranchNode * newNode = new BranchNode;
     newNode->commitMessage = msg;
@@ -286,14 +307,36 @@ string MiniGit::commit(string msg)
                 if(s1.str() != s2.str())
                 {
                     curr->version+=1;
-                    fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+                    
+                    // create new file in minigit
+                    fstream myFileF;
+                    myFileF.open(curr->name);
+                    ostringstream myFileO;
+                    myFileO<< myFileF.rdbuf();
+        
+                    
+                    ofstream newFile(".minigit/"+curr->name+to_string(curr->version));
+                    newFile << myFileO.str();
+                    newFile.close();
+                    myFileF.close();
                 }
                 else
                     check = true;
             }
             else
             {
-                fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+                // create new file in minigit
+                fstream myFileF;
+                myFileF.open(curr->name);
+                ostringstream myFileO;
+                myFileO<< myFileF.rdbuf();
+
+
+                ofstream newFile(".minigit/"+curr->name+to_string(curr->version));
+                newFile << myFileO.str();
+                newFile.close();
+                myFileF.close();
+                
                 check = true;
             }
             curr = curr->next;
@@ -370,23 +413,22 @@ void MiniGit::checkout(string commitID)
     }
     
     // get the node with the right commit   
-    BranchNode * curr = commitHead;
-    while(curr != NULL)
+    BranchNode * commitNode = commitHead;
+    while(commitNode != NULL)
     {
-        if(curr->commitID == commitNum)
+        if(commitNode->commitID == commitNum)
             break;
-        curr = curr->previous;
+        commitNode = commitNode->previous;
     }
     
     // update the directory
-    cout << curr->commitID << endl;
-    FileNode * currFile = curr -> fileHead;
+    cout << commitNode->commitID << endl;
+    FileNode * currFile = commitNode -> fileHead;
     
     while(currFile != NULL)
     {   
         if(fs::exists(currFile->name) && fs::exists(".minigit/"+currFile->name+to_string(currFile->version)))
         {
-
             // get string of file in the curr directory
             fstream myFileF;
             myFileF.open(currFile->name);
@@ -415,5 +457,7 @@ void MiniGit::checkout(string commitID)
             
         currFile = currFile -> next;
     }
+    
+    commitHead = commitNode;
 }
 
