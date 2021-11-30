@@ -80,19 +80,17 @@ void MiniGit::init(int hashtablesize)
     commitHead->previous = NULL;
 }
 
-// check file and update version if already in the minigit
-/*
-for(int i = 0; i < commits; i+=1)
-    if(fs::exists(".minigit/"+fileName+to_string(i)))
-        newFile -> version += 1;
-*/
-
 void MiniGit::add(string fileName) 
 {
     // check minigit exists
     if(!fs::exists(".minigit"))
     {
         cout << "Must intialize" << endl;
+        return;
+    }
+    if(!fs::exists(fileName))
+    {
+        cout << "Enter a valid file name" << endl;
         return;
     }
     // check on right commit
@@ -152,6 +150,7 @@ void MiniGit::rm(string fileName)
         cout << "Must intialize" << endl;
         return;
     }
+    
     // check on right commit
     if(commitHead->commitID != commits)
     {
@@ -259,9 +258,9 @@ string MiniGit::commit(string msg)
     BranchNode * newNode = new BranchNode;
     newNode->commitMessage = msg;
     newNode->commitID = commits+1;
-    newNode -> next = NULL;
+    newNode -> next = NULL;    
     newNode -> fileHead = NULL;
-    //newNode->fileHead = commitHead->fileHead;
+
     
     // empty starting repository add everything from the SLL
     if(commits == 0)
@@ -273,9 +272,21 @@ string MiniGit::commit(string msg)
         FileNode * curr = commitHead->fileHead;
         while(curr != NULL)
         {
-            fs::copy_file(curr->name,".minigit/"+curr->name+to_string(curr->version));
+            // create new file in minigit
+            fstream myFileF;
+            myFileF.open(curr->name);
+            ostringstream myFileO;
+            myFileO<< myFileF.rdbuf();
+
+            ofstream newFile(".minigit/"+curr->name+to_string(curr->version));
+            newFile << myFileO.str();
+            newFile.close();
+            myFileF.close();
+            
             curr = curr->next;
         }
+        
+        newNode->fileHead = commitHead->fileHead;
     }
     // will be copying/adding files
     else
@@ -330,7 +341,6 @@ string MiniGit::commit(string msg)
                 myFileF.open(curr->name);
                 ostringstream myFileO;
                 myFileO<< myFileF.rdbuf();
-
 
                 ofstream newFile(".minigit/"+curr->name+to_string(curr->version));
                 newFile << myFileO.str();
