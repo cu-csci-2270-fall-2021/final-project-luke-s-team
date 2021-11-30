@@ -260,7 +260,24 @@ string MiniGit::commit(string msg)
     newNode->commitID = commits+1;
     newNode -> next = NULL;    
     newNode -> fileHead = NULL;
-
+    
+    // create a deep copy of the previous SLL
+    FileNode * newLL = new FileNode;
+    newNode -> fileHead = newLL;
+    FileNode * crawlLL = commitHead->fileHead;
+    while(crawlLL != NULL)
+    {
+        newLL -> name = crawlLL -> name;
+        newLL -> version = crawlLL -> version;
+        newLL -> repository = crawlLL -> repository;
+        if(crawlLL->next == NULL)
+            newLL -> next = NULL;
+        else
+            newLL -> next = new FileNode;
+        
+       newLL = newLL -> next;
+       crawlLL = crawlLL->next;
+    }
     
     // empty starting repository add everything from the SLL
     if(commits == 0)
@@ -269,7 +286,7 @@ string MiniGit::commit(string msg)
         newNode->previous = NULL;
         
         // add files to minigit
-        FileNode * curr = commitHead->fileHead;
+        FileNode * curr = newNode->fileHead;
         while(curr != NULL)
         {
             // create new file in minigit
@@ -298,7 +315,7 @@ string MiniGit::commit(string msg)
         // this loop also updates the directory with the new file if it was changed
         // also checks if the file of a different name is not in the directory and adds it
         
-        FileNode * curr = commitHead->fileHead;
+        FileNode * curr = newNode->fileHead;
         while(curr != NULL)
         {
             if(fs::exists(".minigit/"+curr->name+to_string(curr->version)))
@@ -363,20 +380,14 @@ string MiniGit::commit(string msg)
     // Do the final update
     newNode->previous = commitHead;
     
-    // create a deep copy of the previous SLL
-    FileNode * newLL = new FileNode;
-    FileNode * crawlLL = commitHead->fileHead;
-    while(crawlLL != NULL)
+    FileNode * ccl = newNode -> fileHead;
+    int ii = 0;
+    while(ccl != NULL)
     {
-        newLL -> name = crawlLL -> name;
-        newLL -> version = crawlLL -> version;
-        newLL -> repository = crawlLL -> repository;
-        newLL -> next = new FileNode;
-        
-        newLL = newLL -> next;
-        crawlLL = crawlLL->next;
+        cout << ii << ": " << ccl->name << ccl->version<< endl;
+        ccl = ccl->next;
+        ii+=1;
     }
-    newLL -> next = NULL;
     
     commits += 1;
     commitHead = newNode;
