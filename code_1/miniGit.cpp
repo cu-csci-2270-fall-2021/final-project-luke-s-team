@@ -285,8 +285,6 @@ string MiniGit::commit(string msg)
             
             curr = curr->next;
         }
-        
-        newNode->fileHead = commitHead->fileHead;
     }
     // will be copying/adding files
     else
@@ -318,6 +316,7 @@ string MiniGit::commit(string msg)
                 if(s1.str() != s2.str())
                 {
                     curr->version+=1;
+                    curr->repository = curr->name + to_string(curr->version);
                     
                     // create new file in minigit
                     fstream myFileF;
@@ -330,9 +329,9 @@ string MiniGit::commit(string msg)
                     newFile << myFileO.str();
                     newFile.close();
                     myFileF.close();
-                }
-                else
+                    
                     check = true;
+                }
             }
             else
             {
@@ -363,7 +362,21 @@ string MiniGit::commit(string msg)
     
     // Do the final update
     newNode->previous = commitHead;
-    newNode->fileHead = commitHead->fileHead;
+    
+    // create a deep copy of the previous SLL
+    FileNode * newLL = new FileNode;
+    FileNode * crawlLL = commitHead->fileHead;
+    while(crawlLL != NULL)
+    {
+        newLL -> name = crawlLL -> name;
+        newLL -> version = crawlLL -> version;
+        newLL -> repository = crawlLL -> repository;
+        newLL -> next = new FileNode;
+        
+        newLL = newLL -> next;
+        crawlLL = crawlLL->next;
+    }
+    newLL -> next = NULL;
     
     commits += 1;
     commitHead = newNode;
@@ -424,16 +437,23 @@ void MiniGit::checkout(string commitID)
     
     // get the node with the right commit   
     BranchNode * commitNode = commitHead;
+    
     while(commitNode != NULL)
     {
         if(commitNode->commitID == commitNum)
             break;
-        commitNode = commitNode->previous;
+        if(commitNum < commitNode->commitID)
+            commitNode = commitNode->previous;
+        else if(commitNum > commitNode->commitID)
+             commitNode = commitNode->next;
     }
     
+    if(commitNode == NULL)
+        cout << "NULL" << endl;
+    
     // update the directory
-    cout << commitNode->commitID << endl;
     FileNode * currFile = commitNode -> fileHead;
+    
     
     while(currFile != NULL)
     {   
@@ -451,16 +471,21 @@ void MiniGit::checkout(string commitID)
             ostringstream gitFileS;
             gitFileS<< gitFileF.rdbuf();
             
-            cout << "Copying: " << gitFileS.str() << " to: " << myFileS.str() << endl;
-           
-            // replace string in directory with string from minigit 
-            ofstream myFileO;
-            myFileO.open(currFile->name);
-            myFileO << gitFileS.str();
-            myFileO.close();
+            
+            if(myFileS.str() != gitFileS.str())
+            {
+                cout << "Copying: " << gitFileS.str() << " to: " << myFileS.str() << endl;
+
+                // replace string in directory with string from minigit 
+                ofstream myFileO;
+                myFileO.open(currFile->name);
+                myFileO << gitFileS.str();
+                myFileO.close();
+            }
             
             myFileF.close();
             gitFileF.close(); 
+            
         }
         else
             cout << "file DNE" << endl;
@@ -469,5 +494,6 @@ void MiniGit::checkout(string commitID)
     }
     
     commitHead = commitNode;
+    
 }
 
