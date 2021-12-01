@@ -11,10 +11,9 @@ namespace fs = std::filesystem;
 
 
 MiniGit::MiniGit() {
-    //fs::remove_all(".minigit");
-    //fs::create_directory(".minigit");
 }
 
+// this function checks if the commit message has already been used
 bool MiniGit::node(string message){
     BranchNode *branchNode = commitHead;
     if(message == branchNode->commitMessage) return true;
@@ -33,11 +32,12 @@ int MiniGit::getCommits()
 MiniGit::~MiniGit() {   
     // Any postprocessing that may be required
     
+    // if not initialized, then nothing to delete
     if(!fs::exists(".minigit"))
         return;
     
+    // get the most recent commit 
     BranchNode * crawler = commitHead;
-    
     while(crawler != NULL)
     {
         if(crawler->commitID == commits)
@@ -48,6 +48,8 @@ MiniGit::~MiniGit() {
             crawler = crawler->next;
     }
     
+    // go through each DLL and delete it
+    // first delete each SLL associated with the DLL
     while(crawler != NULL)
     {
         FileNode * crawler2 = commitHead->fileHead;
@@ -62,10 +64,18 @@ MiniGit::~MiniGit() {
         commitHead = crawler;
     }
     
+    // remove all files from the minigit
     fs::remove_all(".minigit");
 }
+
 void MiniGit::init(int hashtablesize) 
 { 
+    // do not want to initialize a minigit multiple times
+    if(fs::exists(".minigit"))
+    {
+        cout << "Already initialized" << endl;
+        return;
+    }
     
     // initialize new repository
     fs::remove_all(".minigit");
@@ -74,7 +84,7 @@ void MiniGit::init(int hashtablesize)
     // create new hash table
     ht = new HashTable(hashtablesize);
 
-    
+    // set commits to 0
     commits = 0;
 
     // create new commit head to use
@@ -88,39 +98,42 @@ void MiniGit::init(int hashtablesize)
 
 void MiniGit::add(string fileName) 
 {
-    // check minigit exists
+    // check if minigit exists
     if(!fs::exists(".minigit"))
     {
         cout << "Must intialize" << endl;
         return;
     }
+    // check if file exists
     if(!fs::exists(fileName))
     {
         cout << "Enter a valid file name" << endl;
         return;
     }
-    // check on right commit
+    // check if on most recent commit
     if(commitHead->commitID != commits)
     {
         cout << "Not on most current commit. Cannot Add, remove, or commit." << endl;
         return;
     }
-    // create new node
+    
+    // create new node/ file to add to the SLL
     FileNode * newFile = new FileNode;
     newFile -> name = fileName;
     newFile -> version = 0;
     newFile -> next = NULL;
     newFile->repository = fileName + "0";
+    
     // add node to head if head is null
     if(commitHead->fileHead == NULL)
     {
         commitHead -> fileHead = newFile;
     }
-    // add node to end of list
+    // else add node to end of list
     else
     {
         bool check = false;
-        // check that the file does not already exist
+        // check that the file does not already exist in the SLL
         FileNode * crawler = commitHead->fileHead;
         while(crawler != NULL)
         {
@@ -128,11 +141,11 @@ void MiniGit::add(string fileName)
                 check = true;
             crawler = crawler->next;
         }
-        // check that the file exist in the directory
+        // check that the file does not already exist in the directory
         if(!fs::exists(fileName))
             check = true;
         
-        // if file was already in list prompt the user to try again
+        // if file was already exists prompt the user to try again
         if(check)
         {
             cout << "Must enter valid file name" << endl;
@@ -150,29 +163,28 @@ void MiniGit::add(string fileName)
 
 void MiniGit::rm(string fileName) 
 {
-    // check minigit exists
+    // check if minigit exists
     if(!fs::exists(".minigit"))
     {
         cout << "Must intialize" << endl;
         return;
     }
-    
-    // check on right commit
+    // check if on most recent commit
     if(commitHead->commitID != commits)
     {
         cout << "Not on most current commit. Cannot Add, remove, or commit." << endl;
         return;
     }
     
-    // check list is not empty
+    // check to make sure the SLL is not empty
     if(commitHead->fileHead == NULL)
     {
         cout << "There are no files to delete." << endl;
     }
-    // files exist
+    // the SLL is not empty, so can traverse to delete a file
     else
     {
-        // check that the file is in the list
+        // check that the file exists in the SLL
         FileNode * crawler = commitHead->fileHead;
         bool check = false;
         while(crawler != NULL)
@@ -182,22 +194,23 @@ void MiniGit::rm(string fileName)
             crawler = crawler->next;
         }
         
-        //  file not in list
+        //  file not in the SLL
         if(!check)
             cout << "File is not in the list" << endl;
-        // file in list
-        // only head node
+        // file is in SLL so will remove it from the SLL
+        // if the SLL only had a head node delete the head node
         else if(commitHead->fileHead->next == NULL)
         {
             delete commitHead->fileHead;
             commitHead->fileHead = commitHead->fileHead->next;
         }
-        // delete file from list
+        // else delete file from the SLL
         else
         {
             FileNode * pres = commitHead->fileHead;
             FileNode * prev = NULL;
             
+            // find the file to remove
             while(pres != NULL)
             {
                 if(pres->name == fileName)
@@ -217,19 +230,22 @@ void MiniGit::rm(string fileName)
 
 void MiniGit::printSearchTable()
 {
-     ht->printTable();
+    // print the hash table
+    ht->printTable();
 }
 
 
 void MiniGit::search(string key)
 {
-    // check minigit exists
+    // check if minigit exists
     if(!fs::exists(".minigit"))
     {
         cout << "Must intialize" << endl;
         return;
     }
+    
     // check if the key exists in the hash
+    // if it exist search for the key and print its commit numbers
     if(ht->searchItem(key) != NULL)
     {
         HashNode * hn = ht->searchItem(key);
@@ -238,6 +254,7 @@ void MiniGit::search(string key)
             cout << hn->commitNums[j] << ",";
         cout << ")" << endl;
     }
+    // key did not exist
     else
         cout << "Key cannot be found." << endl;
 }
@@ -246,14 +263,13 @@ void MiniGit::search(string key)
 
 string MiniGit::commit(string msg) 
 {
-    // check minigit exists
+    // check if minigit exists
     if(!fs::exists(".minigit"))
     {
         cout << "Must intialize" << endl;
         return "";
     }
-    
-    // check on right commit
+    // check if on right commit
     if(commitHead->commitID != commits)
     {
         cout << "Not on most current commit. Cannot Add, remove, or commit." << endl;
@@ -267,7 +283,7 @@ string MiniGit::commit(string msg)
     newNode -> next = NULL;    
     newNode -> fileHead = NULL;
     
-    // create a deep copy of the previous SLL
+    // create a deep copy of the previous SLL for newNode
     FileNode * newLL = new FileNode;
     newNode -> fileHead = newLL;
     FileNode * crawlLL = commitHead->fileHead;
@@ -285,7 +301,7 @@ string MiniGit::commit(string msg)
        crawlLL = crawlLL->next;
     }
     
-    // empty starting repository add everything from the SLL
+    // empty starting repository add everything from the SLL to minigit
     if(commits == 0)
     {
         // starting with no prev null
@@ -312,7 +328,7 @@ string MiniGit::commit(string msg)
     // will be copying/adding files
     else
     {        
-        // check if changes
+        // check if changes made
         // if no changes do not commit
         bool check = false;
         
@@ -323,8 +339,12 @@ string MiniGit::commit(string msg)
         
         FileNode * curr = newNode->fileHead;
         FileNode * commitCurr = commitHead -> fileHead;
+        // crawl through the SLL
         while(curr != NULL)
         {
+            // check if file already exists in the minigit
+            // if already in minigit check for any changes
+            // if changes update the version of the fil in the SLL and add that version with the new data to the minigit
             if(fs::exists(".minigit/"+curr->name+to_string(curr->version)))
             {
                 // get strings of each file
@@ -360,6 +380,7 @@ string MiniGit::commit(string msg)
                     check = true;
                 }
             }
+            // file was not in the minigit so add it to the minigit
             else
             {
                 // create new file in minigit
@@ -379,6 +400,7 @@ string MiniGit::commit(string msg)
             commitCurr = commitCurr->next;
         }
         
+        // no changes found in the SLL so do not commit
         if(!check)
         {
             cout << "No changes made. Reverting to previous commit" << endl;
