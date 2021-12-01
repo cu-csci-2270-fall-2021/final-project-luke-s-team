@@ -36,28 +36,34 @@ MiniGit::~MiniGit() {
     if(!fs::exists(".minigit"))
         return;
     
-    FileNode * crawler = commitHead->fileHead;
-    while(commitHead->fileHead != NULL)
-    {
-        crawler = commitHead->fileHead -> next;
-        delete commitHead->fileHead;
-        commitHead->fileHead = crawler;
-    }
-    commitHead->fileHead = NULL;
+    BranchNode * crawler = commitHead;
     
-    // delete the doubly linked list
-    BranchNode * crawler2 = commitHead;
-    while(commitHead != NULL)
+    while(crawler != NULL)
     {
-        crawler2 = commitHead -> next;
-        delete commitHead;
-        commitHead = crawler2;
+        if(crawler->commitID == commits)
+            break;
+        if(commits < crawler->commitID)
+            crawler = crawler->previous;
+        else if(commits > crawler->commitID)
+            crawler = crawler->next;
     }
-    commitHead = NULL;
+    
+    while(crawler != NULL)
+    {
+        FileNode * crawler2 = commitHead->fileHead;
+        while(crawler2 != NULL)
+        {
+            crawler2 = commitHead->fileHead->next;
+            delete commitHead->fileHead;
+            commitHead->fileHead = crawler2;
+        }
+        crawler = commitHead->previous;
+        delete commitHead;
+        commitHead = crawler;
+    }
     
     fs::remove_all(".minigit");
 }
-
 void MiniGit::init(int hashtablesize) 
 { 
     
