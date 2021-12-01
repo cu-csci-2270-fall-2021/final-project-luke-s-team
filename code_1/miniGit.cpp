@@ -256,7 +256,7 @@ string MiniGit::commit(string msg)
     
     // create new node
     BranchNode * newNode = new BranchNode;
-    newNode->commitMessage = msg;
+    newNode->commitMessage = "";
     newNode->commitID = commits+1;
     newNode -> next = NULL;    
     newNode -> fileHead = NULL;
@@ -332,6 +332,7 @@ string MiniGit::commit(string msg)
                 // compare to check changes
                 if(s1.str() != s2.str())
                 {
+                    // update file in the SLL
                     curr->version+=1;
                     curr->repository = curr->name + to_string(curr->version);
                     
@@ -379,6 +380,7 @@ string MiniGit::commit(string msg)
     
     // Do the final update
     newNode->previous = commitHead;
+    commitHead->next = newNode;
     
     FileNode * ccl = newNode -> fileHead;
     int ii = 0;
@@ -390,6 +392,7 @@ string MiniGit::commit(string msg)
     }
     
     commits += 1;
+    commitHead -> commitMessage = msg;
     commitHead = newNode;
     
     // update commits in hash table
@@ -456,11 +459,8 @@ void MiniGit::checkout(string commitID)
         if(commitNum < commitNode->commitID)
             commitNode = commitNode->previous;
         else if(commitNum > commitNode->commitID)
-             commitNode = commitNode->next;
+            commitNode = commitNode->next;
     }
-    
-    if(commitNode == NULL)
-        cout << "NULL" << endl;
     
     // update the directory
     FileNode * currFile = commitNode -> fileHead;
