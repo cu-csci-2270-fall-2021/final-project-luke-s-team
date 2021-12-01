@@ -316,6 +316,7 @@ string MiniGit::commit(string msg)
         // also checks if the file of a different name is not in the directory and adds it
         
         FileNode * curr = newNode->fileHead;
+        FileNode * commitCurr = commitHead -> fileHead;
         while(curr != NULL)
         {
             if(fs::exists(".minigit/"+curr->name+to_string(curr->version)))
@@ -333,6 +334,8 @@ string MiniGit::commit(string msg)
                 if(s1.str() != s2.str())
                 {
                     // update file in the SLL
+                    commitCurr->version+=1;
+                    commitCurr->repository= commitCurr->name + to_string(commitCurr->version);
                     curr->version+=1;
                     curr->repository = curr->name + to_string(curr->version);
                     
@@ -367,6 +370,7 @@ string MiniGit::commit(string msg)
                 check = true;
             }
             curr = curr->next;
+            commitCurr = commitCurr->next;
         }
         
         if(!check)
