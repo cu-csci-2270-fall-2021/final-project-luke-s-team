@@ -3,12 +3,6 @@
 #include <filesystem>
 #include <string>
 using namespace std;
-// temporary comment, remove befor turning in
-// use this command to run the code
-// g++ --std=c++17 main_1.cpp ../code_1/miniGit.cpp ../code_1/hash.cpp -o a.out
-
-//g++ --std=c++17 ../app_1/main_1.cpp ../code_1/miniGit.cpp ../code_1/hash.cpp -o a.out
-
 /*
  * Purpose; displays a menu with options
  */
@@ -38,7 +32,7 @@ bool checkCommitMessage(string message)
         return false;
     return true;
 }
-
+// make sure the user enters a valid word to to search for
 bool checkSearchKey(string key)
 {
     for(int i = 0; i < key.size(); i+=1)
@@ -46,7 +40,7 @@ bool checkSearchKey(string key)
             return false;
     return true;
 }
-
+// make sure the user enters a valid search key
 bool checkCommitNum(string commitNum)
 {
     // check to make sure string is a number
@@ -133,6 +127,7 @@ int main(int argc, char* argv[])
                     cout << "Enter a valid commit number: ";
                     getline(cin,commitNum);
                 }
+                myGit.checkout(commitNum);
             break;
                 
             // Search commits based on key word
