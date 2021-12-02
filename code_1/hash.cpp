@@ -66,8 +66,7 @@ bool HashTable::insertItem(string key, int cNum)
     else
     {
         HashNode * hn = searchItem(key);
-        hn->commitNums.push_back(cNum);
-        
+        hn->commitNums.push_back(cNum);  
     }
     return false;
 }
@@ -88,7 +87,7 @@ void HashTable::printTable()
 {
     for(int i = 0; i < tableSize; i+=1)
     {
-        cout << i << "// ";
+        cout << i << "|| ";
         HashNode * curr = table[i];
         while(curr != NULL)
         {
